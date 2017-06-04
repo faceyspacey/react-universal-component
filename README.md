@@ -1,5 +1,7 @@
 # `react-loadable`
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/faceyspacey/react-universal-component.svg)](https://greenkeeper.io/)
+
 A higher order component for loading components with promises.
 
 - Returns `null` until after a `delay` (default: 200ms)
