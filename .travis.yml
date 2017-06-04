@@ -1,0 +1,19 @@
+language: node_js
+node_js:
+  - stable
+cache: yarn
+script:
+  - node_modules/.bin/travis-github-status lint flow jest codeclimate
+notifications:
+  email: false
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/6ab20a35e94285bd8673
+    on_success: always  # options: [always|never|change] default: always
+    on_failure: always  # options: [always|never|change] default: always
+    on_start: never     # options: [always|never|change] default: always
+after_success:
+  - npm run semantic-release
+branches:
+  except:
+    - /^v\d+\.\d+\.\d+$/

@@ -1,0 +1,33 @@
+languages:
+  JavaScript: true
+
+engines:
+  duplication:
+    enabled: true
+    config:
+      languages:
+      - javascript:
+  fixme:
+    enabled: true
+  eslint:
+    enabled: true
+    config:
+      config: .eslintrc.js
+    checks:
+      import/no-unresolved:
+        enabled: false
+      import/extensions:
+        enabled: false
+
+ratings:
+   paths:
+   - "src/**"
+
+exclude_paths:
+- "docs/"
+- "dist/"
+- "flow-typed/"
+- "node_modules/"
+- ".vscode/"
+- ".eslintrc.js"
+- "**/*.snap"

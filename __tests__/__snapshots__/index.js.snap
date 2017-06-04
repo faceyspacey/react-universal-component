@@ -1,0 +1,205 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Component.preload: static preload method pre-fetches chunk 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`Component.preload: static preload method pre-fetches chunk 2`] = `
+<p>
+  MyComponent 
+  {}
+</p>
+`;
+
+exports[`Component.preload: static preload method pre-fetches chunk 3`] = `
+<p>
+  MyComponent 
+  {}
+</p>
+`;
+
+exports[`async lifecycle component unmounted: setState not called 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`async lifecycle error 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`async lifecycle error 2`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`async lifecycle error 3`] = `
+<div>
+  Error!
+</div>
+`;
+
+exports[`async lifecycle loading 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`async lifecycle loading 2`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`async lifecycle loading 3`] = `
+<p>
+  MyComponent 
+  {}
+</p>
+`;
+
+exports[`async lifecycle loading 4`] = `
+<p>
+  MyComponent 
+  {}
+</p>
+`;
+
+exports[`async lifecycle timeout error 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`async lifecycle timeout error 2`] = `
+<div>
+  Error!
+</div>
+`;
+
+exports[`other options key (function): resolves export to function return 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`other options key (function): resolves export to function return 2`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`other options key (function): resolves export to function return 3`] = `
+<p>
+  MyComponent 
+  {}
+</p>
+`;
+
+exports[`other options key (string): resolves export to value of key 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`other options key (string): resolves export to value of key 2`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`other options key (string): resolves export to value of key 3`] = `
+<p>
+  MyComponent 
+  {}
+</p>
+`;
+
+exports[`other options minDelay: loads for duration of minDelay even if component ready 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`other options minDelay: loads for duration of minDelay even if component ready 2`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`other options minDelay: loads for duration of minDelay even if component ready 3`] = `
+<p>
+  MyComponent 
+  {}
+</p>
+`;
+
+exports[`props: all components receive props custom error component 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`props: all components receive props custom error component 2`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`props: all components receive props custom error component 3`] = `
+<p>
+  Error! 
+  {"prop":"foo","error":{}}
+</p>
+`;
+
+exports[`props: all components receive props custom error component 4`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`props: all components receive props custom loading component 1`] = `
+<p>
+  Loading... 
+  {"prop":"foo"}
+</p>
+`;
+
+exports[`props: all components receive props custom loading component 2`] = `
+<p>
+  Loading... 
+  {"prop":"foo"}
+</p>
+`;
+
+exports[`props: all components receive props custom loading component 3`] = `
+<p>
+  MyComponent 
+  {"prop":"foo"}
+</p>
+`;
+
+exports[`props: all components receive props custom loading component 4`] = `
+<p>
+  MyComponent 
+  {"prop":"bar"}
+</p>
+`;
+
+exports[`server-side rendering es5: module.exports resolved 1`] = `
+<div>
+  fixture-ES5
+</div>
+`;
+
+exports[`server-side rendering es6: default export automatically resolved 1`] = `
+<div>
+  fixture1
+</div>
+`;
