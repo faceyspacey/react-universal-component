@@ -10,6 +10,7 @@ A simplified combination async/sync ("Universal") component inspired by React Lo
 - **@djeeg** for his idea for the `onLoad` hook for doing things like replacing reducers
 - **@richardscarrott** for providing a key element throughout this process: [webpack-hot-server-middleware](webpack-hot-server-middleware) which allows for the best universal HMR experience I've seen/had to date
 - **@cletusw** for paving the way in what became [extract-css-chunks-webpack-plugin](https://github.com/faceyspacey/extract-css-chunks-webpack-plugin) via his [HMR support PR to extract-text-webpack-plugin](https://github.com/webpack-contrib/extract-text-webpack-plugin/pull/457)
+- [async-reactor](https://github.com/xtuc/async-reactor) for indicating the problem of having 2 potentially simultaneous async fetching needs: *async component import* + *data-fetching*. The [`isLoading`](#props-api) prop passed to the component returned from the HoC is outcome here.
 - **Next.js** for being the first to offer any such feature for complete universal rendering, and for indicating the need for such capabilities in the greater NPM community
 
 
@@ -134,40 +135,6 @@ All are optional except `resolve` and if you are using Babel on the server, you 
 If you're wondering why things like `import()` and `require.resolveWeak()` must be called as a function, i.e. `() => import()`, there are a few scenarios where you don't have to. We don't have the benefit of whatever Next.js does in their transpilation to bypass this, but if within your own wrapping function or HoC, you may be able to avoid it. Both possibilities are ultimately allowed, though not documented here. Checkout [require-universal-module](https://github.com/faceyspacey/require-universal-module) for how to do this and an explanation of a few more possibilities for these options. Most these options are simply passed to that package.
 
 
-## Props API
-
-This package has one more evolution for you: you can pass `isLoading` and `error` props to the resulting component returned from the HoC. This has the convenient benefit of allowing you to continue to show the ***same*** `loading` component (or trigger the ***same*** `error` component) that is shown while your async component loads *AND* while any data-fetching may be occuring in a parent HoC. That means less jank from unnecessary re-renders, and less work (DRY).
-
-Here's an example using Apollo:
-
-```js
-const UniversalUser = universal(() => import('./User'), {
-  resolve: () => require.resolveWeak('./User')
-})
-
-const User = ({ loading, error, user }) =>
-  <div>
-    <UniversalUser isLoading={loading} error={error} user={user} />
-  </div>
-
-
-export default graphql(gql`
-  query CurrentUserForLayout {
-    user {
-      id
-      name
-    }
-  }
-`, {
-  props: ({ ownProps, data: { loading, error, user } }) => ({
-    loading,
-    error,
-    user,
-  }),
-})(User)
-```
-
-
 ## Module/Chunk Flushing
 
 You saw this above. Below is an example of both options:
@@ -190,4 +157,95 @@ export default function serverRender(req, res) => {
 As you can see, their usage is basically identical. Just make sure you're using Webpack's ["magic comment"](https://webpack.js.org/guides/code-splitting-async/#chunk-names) feature if you plan to call `flushChunkNames`. See [Webpack Flush Chunks](https://github.com/faceyspacey/webpack-flush-chunks) for how to put your Webpack configuration together.
 
 
+## Props API
+
+This package has one more evolution for you: you can pass `isLoading` and `error` props to the resulting component returned from the HoC. This has the convenient benefit of allowing you to continue to show the ***same*** `loading` component (or trigger the ***same*** `error` component) that is shown while your async component loads *AND* while any data-fetching may be occuring in a parent HoC. That means less jank from unnecessary re-renders, and less work (DRY).
+
+Here's an example using Apollo:
+
+```js
+const UniversalUser = universal(() => import('./User'), {
+  resolve: () => require.resolveWeak('./User')
+})
+
+const User = ({ loading, error, user }) =>
+  <div>
+    <UniversalUser isLoading={loading} error={error} user={user} />
+  </div>
+
+export default graphql(gql`
+  query CurrentUserForLayout {
+    user {
+      id
+      name
+    }
+  }
+`, {
+  props: ({ ownProps, data: { loading, error, user } }) => ({
+    loading,
+    error,
+    user,
+  }),
+})(User)
+```
+> If it's not clear, the ***same*** `loading` component will show while both async aspects load, without flinching/re-rendering. And perhaps more importantly they will be run in parallel.
+
+
 ## Comparison to Other "Universal" Rendering Solutions
+
+- **[Next.js](https://github.com/zeit/next.js):** You gotta use a framework. Before this and `webpack-flush-chunks` came out, Next.js was the only game in town. If you're building a large custom app and/or are an expert in Webpack already, I wouldn't recommend sacrificing control to take on a framework. If you're new to Webpack, NPM, javascript development in general or you're a novice to intermediate developer it may be a fine option. Next.js started out only with route-based SSR + code-splitting in the fall of 2016. In the spring of 2017 they cracked the same nut that all this does as well, but, again, you're confined to the opinions, capabilities/limitations and potential workarounds that are typical of using a framework.
+
+- **Meteor:** Ok, now you're dealing with an even bigger framework. A true framework. ***Secret:*** I spent 3.5 years from 2012 to the beginning of 2016 dedicated to Meteor. Frameworks at that level or even *Next.js*'s level are done for me. No more. But it's really on you and your needs. You may be an expert developer from different languages that needs to jump into your first web app. Meteor will kick ass for you. ...But anyway, Meteor has recently (spring 2017) come out with their "exact code splitting" technique where they only serve the missing modules in async imports instead of whole chunks. It's amazing and spot-on, as with many things they do. The flaw I see though is this: they serve it over websockets. That means cycles on the server you're paying for to serve those modules, when Cloudflare would cache them in a CDN for free. Same with your primary chunks/modules. Next: I'm actually not even sure they have server-rendering. I've asked, but haven't had a response yet. They may just only have the async import aspect down, but not all the server-rendering stuff. But if they do (or when they do), great--Meteor has it's place, and if it's for you, you will go far.
+
+- **[React Loadable](https://github.com/thejameskyle/react-loadable):** I consider `react-universal-component` the spiritual successor to *React Loadable*. The primary comparison is this package addresses 3-4 PRs yet to be merged into React Loadable (credit was given for most of them in the Thanks at the top of this readme). Secondly, it's built with a primary coupling to `webpack-flush-chunks` in mind, which brings everything full circle. They will stay updated together, etc. That said, you can use `webpack-flush-chunks` with React Loadable. If that's what you feel like doing, do it and get on with your life! However, this package has HMR which *React Loadable* doesn't. Those async imports, when using *React Loadable*, won't continue to update if you make some changes to them. Because of that, your developer experience will suffer and perhaps it's a good idea to just switch to `react-universal-component` sooner than later. That said, 2 months ago I put in a [PR](https://github.com/thejameskyle/react-loadable/pull/37) to give *React Loadable* HMR. I assume at some point it will get merged.
+
+- **[Async Reactor](https://github.com/xtuc/async-reactor):** Is a sweet solution that promotes stateless functional components and async data + import needs all in one. Ultimately the primary use case you can do with `react-universal-component` as well. That use-case is as follows:
+
+```js
+const asyncWork = async ({ id }) => {
+  const prom = await Promise.all([
+    import('./UserComponent'),
+    fetch(`/user-data?id=${id}`)
+  ])
+
+  const Component = prom[0].default
+  const data = await prom[1].json()
+
+  return <Component data={data} />
+}
+
+const AsyncComponent = () => universal(asyncWork, {
+  resolve: () => require.resolveWeak('./UserComponent'),
+  key: mod => mod.default || mod // default export on server || <Component /> on client
+})
+
+export default () => <AsyncComponent id={123} />
+```
+
+If what you're saying to yourself is: "but how do you fetch the data on the server?" you'd be correct. The fact of the matter is *Async Reactor* offers no solution for server-rendering. So both solutions come with that caveat. That said, it's not a requirement that `react-universal-component` has to be used with server-rendering. If you wanted to use it just for it's async aspects, you could. And therefore you could utilize the same pattern as Async Reactor. You just need to specify a dynamic `key` function that returns something different in each environment as shown above. 
+
+That said, there is something you can't do with `react-universal-component` that you can with `async-reactor`. That is in the latter you can have multiple module imports. In both you can have multiple async data-fetching tasks. However, here's the real thing: you actually shouldn't provide the `resolve` option, as on the server you will synchronously render something different than on the client (which leads to React checksum mismatches and re-rendering), since the client will have to display the `loading` component no matter what, while *all* async fetching is waited upon. Basically what it boils down to is rendering a `loading` component on the server and the same `loading` component on the client, and then additional async requests solely on the client. So, boom, you can do multiple module imports using `react-universal-component` in fact. You just have to forget all about synchronous rendering, and the result is you can do exactly what *Async Reactor* does. In fact, you can even specify `key: null` to always return the entire module, which in this case is `<Component />`.
+
+To complete this thought--because *Async Reactor* in how it potentially allows for multiple imports + data on the server is quite compelling--let's think about how this could all work synchronously on the server. Basically, you gotta do something like what Apollo does with regards to server Rendering. Here's how they handle promise resolution within rendered components on the server:
+
+```js
+
+import { renderToStringWithData } from "react-apollo"
+
+export default async function serverRender(req, res) {
+  const client = new ApolloClient(....)
+  const content = await renderToStringWithData(app) // walk render tree and resolve all data-fetching promises
+
+  const initialState = {[client.reduxRootKey]: client.getInitialState() }
+  const html = <Html content={content} state={initialState} />
+  res.send(`<!doctype html>\n${ReactDOM.renderToStaticMarkup(html)}`)
+}
+```
+
+So in short, *Async Reactor* would a need a mechanism of its own that walks the component render tree and recursively resolves all promises (i.e. if after one promise resolves, it renders another component which fetches more data on mount, it must wait on and resolve those too). If it had that, it could cache the result for the 2nd synchronous render that must follow to pickup. 
+
+What *Apollo* does here is fantastic, and to be clear: if you've designed your app correctly, you won't lose precious milliseconds waiting for recursive promises to resolve. It will just be one level deep. It's also highly efficient because it skips 2 of the 3 stages of React rendering: diffing/reconciliation + rendering to the real DOM. It basically only renders the virtual DOM (by manually calling the tree of all your render functions). It's a great solution. What I can't imagine and wouldn't like is having both *Apollo* + *Async Reactor* walk the render tree. Unless you forked *Apollo* and gave it the capability to simultaneously check for *Async Reactor* promises, you'd end up with 2 rounds of virtual DOM rendering--and all before the 3rd synchronous render. That's precious time that is building up. 
+
+I've seen ad hoc solutions that resolve promises and call `componentWillMount` async data fetching methods, and personally I'm against it. I recommend one of 2 solutions: use a routing solution (perhaps ad hoc) that determines your data needs and fetches them and then dispatches the result as actions against your store; and then render your app in one synchronous go. OR secondly: use solution dedicated to this problem like Apollo. The reason you're using Apollo is because it gets extreme value out of pairing your data-needs to components. You can use stateless component functions and using `componentWillMount` is a thing of the past. There's a trend of pairing data-needs to components, but I personally don't see it unless it's with GraphQL. Figure out your data needs on the server and dispatch on your redux store before your single synchronous render. That's my conclusion. The promise resolution stuff is a mess unless someone else (*Apollo*) did it for you.
+
+Anyway, the point in all this is: a lot of work has been put into reviewing the trends, problems and all possible solutions so you don't have to. In the words of @thejameskyle, "use this shit!"
