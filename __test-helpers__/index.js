@@ -12,8 +12,10 @@ export const MyComponent = props => <p>MyComponent {JSON.stringify(props)}</p>
 
 export const createComponent = (delay, Component, error?) => async () => {
   await waitFor(delay)
+
   if (Component) {
     return Component
   }
+
   throw error
 }

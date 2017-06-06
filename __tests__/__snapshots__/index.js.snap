@@ -139,6 +139,32 @@ exports[`other options minDelay: loads for duration of minDelay even if componen
 </p>
 `;
 
+exports[`props: all components receive props <MyUniversalComponent error={new Error} /> - also displays error component 1`] = `
+<p>
+  Error! 
+  {"error":{}}
+</p>
+`;
+
+exports[`props: all components receive props <MyUniversalComponent error={new Error} /> - also displays error component 2`] = `
+<p>
+  Error! 
+  {"error":{}}
+</p>
+`;
+
+exports[`props: all components receive props <MyUniversalComponent isLoading /> - also displays loading component 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`props: all components receive props <MyUniversalComponent isLoading /> - also displays loading component 2`] = `
+<div>
+  Loading...
+</div>
+`;
+
 exports[`props: all components receive props custom error component 1`] = `
 <div>
   Loading...

@@ -10,6 +10,8 @@ type AsyncComponent<Props> =
   | Promise<Component<Props>>
   | (() => Promise<Component<Props>>)
 type Key<Props> = string | null | ((module: Object) => Component<Props>)
+type OnLoad = (module: Object) => void
+
 type Options<Props> = {
   loading?: LoadingCompponent,
   error?: ErrorComponent,
@@ -20,13 +22,19 @@ type Options<Props> = {
   path?: string,
   chunkName?: string,
   timeout?: number,
-  key?: Key<Props>
+  key?: Key<Props>,
+  onLoad: OnLoad
+}
+
+type Props = {
+  error?: ?any,
+  isLoading?: ?boolean
 }
 
 const DefaultLoading = () => <div>Loading...</div>
 const DefaultError = () => <div>Error!</div>
 
-export default function Loadable<Props: {}>(
+export default function universalComponent<Props: Props>(
   component: AsyncComponent<Props>,
   opts: Options<Props> = {}
 ) {
@@ -96,15 +104,24 @@ export default function Loadable<Props: {}>(
 
     render() {
       const { error, hasComponent } = this.state
+      const { isLoading, error: userError, ...props } = this.props
 
-      if (hasComponent && Component) {
-        return <Component {...this.props} />
+      // user-provided props (e.g. for data-fetching loading):
+      if (isLoading) {
+        return <Loading {...props} />
+      }
+      else if (userError) {
+        return <Err {...props} error={userError} />
+      }
+      else if (hasComponent && Component) {
+        // primary usage (for async import loading + errors):
+        return <Component {...props} />
       }
       else if (error) {
-        return <Err {...this.props} error={error} />
+        return <Err {...props} error={error} />
       }
 
-      return <Loading {...this.props} />
+      return <Loading {...props} />
     }
   }
 }

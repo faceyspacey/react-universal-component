@@ -118,6 +118,28 @@ describe('props: all components receive props', () => {
 
     expect(component2.toJSON()).toMatchSnapshot() // loading again..
   })
+
+  it('<MyUniversalComponent isLoading /> - also displays loading component', async () => {
+    const importAsync = createComponent(40, MyComponent)
+    const Component = universalComponent(importAsync)
+
+    const component1 = renderer.create(<Component isLoading />)
+    expect(component1.toJSON()).toMatchSnapshot() // initial
+
+    await waitFor(50)
+    expect(component1.toJSON()).toMatchSnapshot() // loading even though async component is available
+  })
+
+  it('<MyUniversalComponent error={new Error} /> - also displays error component', async () => {
+    const importAsync = createComponent(40, MyComponent)
+    const Component = universalComponent(importAsync, { error: Err })
+
+    const component1 = renderer.create(<Component error={new Error('ah')} />)
+    expect(component1.toJSON()).toMatchSnapshot() // initial
+
+    await waitFor(50)
+    expect(component1.toJSON()).toMatchSnapshot() // error even though async component is available
+  })
 })
 
 describe('server-side rendering', () => {
@@ -209,16 +231,16 @@ describe('other options', () => {
   it('minDelay: loads for duration of minDelay even if component ready', async () => {
     const importAsync = createComponent(40, MyComponent)
     const Component = universalComponent(importAsync, {
-      minDelay: 50
+      minDelay: 60
     })
 
     const component = renderer.create(<Component />)
     expect(component.toJSON()).toMatchSnapshot() // initial
 
-    await waitFor(41)
+    await waitFor(45)
     expect(component.toJSON()).toMatchSnapshot() // still loading
 
-    await waitFor(20)
+    await waitFor(30)
     expect(component.toJSON()).toMatchSnapshot() // loaded
   })
 })
