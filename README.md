@@ -133,6 +133,41 @@ All are optional except `resolve` and if you are using Babel on the server, you 
 
 If you're wondering why things like `import()` and `require.resolveWeak()` must be called as a function, i.e. `() => import()`, there are a few scenarios where you don't have to. We don't have the benefit of whatever Next.js does in their transpilation to bypass this, but if within your own wrapping function or HoC, you may be able to avoid it. Both possibilities are ultimately allowed, though not documented here. Checkout [require-universal-module](https://github.com/faceyspacey/require-universal-module) for how to do this and an explanation of a few more possibilities for these options. Most these options are simply passed to that package.
 
+
+## Props API
+
+This package has one more evolution for you: you can pass `isLoading` and `error` props to the resulting component returned from the HoC. This has the convenient benefit of allowing you to continue to show the ***same*** `loading` component (or trigger the ***same*** `error` component) that is shown while your async component loads *AND* while any data-fetching may be occuring in a parent HoC. That means less jank from unnecessary re-renders, and less work (DRY).
+
+Here's an example using Apollo:
+
+```js
+const UniversalUser = universal(() => import('./User'), {
+  resolve: () => require.resolveWeak('./User')
+})
+
+const User = ({ loading, error, user }) =>
+  <div>
+    <UniversalUser isLoading={loading} error={error} user={user} />
+  </div>
+
+
+export default graphql(gql`
+  query CurrentUserForLayout {
+    user {
+      id
+      name
+    }
+  }
+`, {
+  props: ({ ownProps, data: { loading, error, user } }) => ({
+    loading,
+    error,
+    user,
+  }),
+})(User)
+```
+
+
 ## Module/Chunk Flushing
 
 You saw this above. Below is an example of both options:
