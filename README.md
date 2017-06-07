@@ -2,6 +2,20 @@
 
 A simplified combination async/sync ("Universal") component inspired by React Loadable and other developments in the React/Webpack world. 
 
+```js
+import universal from 'react-universal-component'
+
+const UniversalComponent = universal(() => import('../components/Foo'), {
+  resolve: () => require.resolveWeak('./Foo')
+})
+
+export default () =>
+  <div>
+    <UniversalComponent />
+  </div>
+```
+
+
 ## Thanks
 
 - **React Loadable** and **@thejameskyle** for paving the way and [discovering the path forward](https://medium.com/@thejameskyle/react-loadable-2674c59de178#.6h46yjgwr)
@@ -11,7 +25,7 @@ A simplified combination async/sync ("Universal") component inspired by React Lo
 - **@richardscarrott** for providing a key element throughout this process: [webpack-hot-server-middleware](webpack-hot-server-middleware) which allows for the best universal HMR experience I've seen/had to date
 - **@cletusw** for paving the way in what became [extract-css-chunks-webpack-plugin](https://github.com/faceyspacey/extract-css-chunks-webpack-plugin) via his [HMR support PR to extract-text-webpack-plugin](https://github.com/webpack-contrib/extract-text-webpack-plugin/pull/457)
 - [async-reactor](https://github.com/xtuc/async-reactor) for indicating the problem of having 2 potentially simultaneous async fetching needs: *async component import* + *data-fetching*. The [`isLoading`](#props-api) prop passed to the component returned from the HoC is outcome here.
-- **Next.js** for being the first to offer any such feature for complete universal rendering, and for indicating the need for such capabilities in the greater NPM community
+- **Next.js** for being the first to offer any such feature for complete universal rendering, and for indicating the need for such capabilities in the greater NPM community. The 2 argument API of `universal` is also borrowed from their [`dynamic` HoC](https://github.com/zeit/next.js#dynamic-import).
 
 
 
@@ -50,13 +64,13 @@ Study [Webpack Flush Chunks](https://github.com/faceyspacey/webpack-flush-chunks
 import React from 'react'
 import universal from 'react-universal-component'
 
-const MyUniversalComponent = universal(() => import('./Foo'), {
+const UniversalComponent = universal(() => import('./Foo'), {
   resolve: () => require.resolveWeak('./Foo')
 })
 
 export default () =>
   <div>
-    <MyUniversalComponent />
+    <UniversalComponent />
   </div>
 ```
 
@@ -249,4 +263,9 @@ What *Apollo* does here is fantastic, and to be clear: if you've designed your a
 
 I've seen ad hoc solutions that resolve promises and call `componentWillMount` async data fetching methods, and personally I'm against it. I recommend one of 2 solutions: use a routing solution (perhaps ad hoc) that determines your data needs and fetches them and then dispatches the result as actions against your Redux store; ***and then render your app in one synchronous go***. OR secondly: use solutions dedicated to this problem like Apollo. (Also, if it's not clear: this package will work perfectly with Apollo). The reason you're using Apollo is because it gets extreme value out of pairing your data-needs to components. With *Apollo*, you can use stateless component functions + slick HoCs--using `componentWillMount` and manually fetching data is a thing of the past. There's a trend of pairing data-needs to components, but I personally don't see it unless it's with GraphQL. If you're not using something like *Apollo*, figure out your data needs on the server and dispatch on your redux store before your single synchronous render. That's my conclusion and recommendation. The promise resolution stuff + sniffing out data fetching in `componentWillMount` is a mess unless someone else (*Apollo*) did it for you. I prefer my components truly pure unless it's with Apollo/Relay/Etc.
 
-Anyway, **what's the point in all this?**: a lot of work has been put into reviewing the trends, problems and all possible solutions so you don't have to. In the words of @thejameskyle, "use this shit!"
+Anyway, **what's the point in all this?**: a lot of work has been put into reviewing the trends, problems and all possible solutions so you don't have to. In the words of **@thejameskyle**, "use this shit!"
+
+
+## Contributing
+
+We use [commitizen](https://github.com/commitizen/cz-cli), so run `npm run cm` to make commits. A command-line form will appear, requiring you answer a few questions to automatically produce a nicely formatted commit. Releases, semantic version numbers, tags and changelogs will automatically be generated based on these commits thanks to [semantic-release](https://github.com/semantic-release/semantic-release). Be good.
