@@ -123,7 +123,7 @@ All are optional except `resolve` and if you are using Babel on the server, you 
 - `chunkName`: `'myChunkName'` 
 - `timeout`: `15000` -- *default*
 - `onLoad`: `module => doSomething(module)
-- `minDelay`: `300` -- *default*
+- `minDelay`: `0` -- *default*
 
 
 **In Depth:**
@@ -171,6 +171,29 @@ export default function serverRender(req, res) => {
 As you can see, their usage is basically identical. Just make sure you're using Webpack's ["magic comment"](https://webpack.js.org/guides/code-splitting-async/#chunk-names) feature if you plan to call `flushChunkNames`. See [Webpack Flush Chunks](https://github.com/faceyspacey/webpack-flush-chunks) for how to put your Webpack configuration together.
 
 
+## Preload
+
+You can also preload the async component if there's a likelihood it will show soon:
+
+```js
+import universal from 'react-universal-component'
+
+const UniversalComponent = universal(() => import('../components/Foo'), {
+  resolve: () => require.resolveWeak('./Foo')
+})
+
+export default class MyComponent extends React.Component {
+  componentWillMount() {
+    UniversalComponent.preload()
+  }
+
+  render() {
+    return <div>{this.props.visible && <UniversalComponent />}</div>
+  }
+}
+```
+
+
 ## Props API
 
 This package has one more evolution for you: you can pass `isLoading` and `error` props to the resulting component returned from the `universal` HoC. This has the convenient benefit of allowing you to continue to show the ***same*** `loading` component (or trigger the ***same*** `error` component) that is shown while your async component loads *AND* while any data-fetching may be occuring in a parent HoC. That means less jank from unnecessary re-renders, and less work (DRY).
@@ -211,7 +234,7 @@ export default graphql(gql`
 
 - **[Meteor](https://www.meteor.com):** Ok, now you're dealing with an even bigger framework. A true framework. ***Secret:*** I spent 3.5 years from 2012 to the beginning of 2016 dedicated to Meteor. Frameworks at that level or even *Next.js*'s level are done for me. No more. But it's really on you and your needs. You may be an expert developer from different languages that needs to jump into your first web app. Meteor will kick ass for you. ...But anyway, Meteor has recently (spring 2017) come out with their "exact code splitting" technique where they only serve the missing modules in async imports instead of whole chunks. It's amazing and spot-on, as with many things they do. The flaw I see though is this: they serve it over websockets. That means cycles on the server you're paying for to serve those modules, when Cloudflare would cache them in a CDN for free. Same with your primary chunks/modules. Next: I'm actually not even sure they have server-rendering. I've asked, but haven't had a response yet. They may just only have the async import aspect down, but not all the server-rendering stuff. Meteor has always been week when it comes to server-side rendering. But if they do (or when they do), great--Meteor has it's place, and if it's for you, you will go far.
 
-- **[React Loadable](https://github.com/thejameskyle/react-loadable):** I consider `react-universal-component` the spiritual successor to *React Loadable*. The primary comparison is this package addresses 3-4 PRs yet to be merged into React Loadable (credit was given for most of them in the *Thanks* at the top of this readme). Secondly, it's built with a primary coupling to `webpack-flush-chunks` in mind, which brings everything full circle. They will stay updated together, etc. That said, you can use `webpack-flush-chunks` with React Loadable. If that's what you feel like doing, do it and get on with your life! However, this package has HMR which *React Loadable* doesn't. Those async imports, when using *React Loadable*, won't continue to update if you make some changes to them. Because of that, your developer experience will suffer and perhaps it's a good idea to just switch to `react-universal-component` sooner than later. That said, 2 months ago I put in a [PR](https://github.com/thejameskyle/react-loadable/pull/37) to give *React Loadable* HMR. I assume at some point it will get merged.
+- **[React Loadable](https://github.com/thejameskyle/react-loadable):** I consider `react-universal-component` the spiritual successor to *React Loadable*. The primary comparison is this package addresses 3-4 PRs yet to be merged into React Loadable (credit was given for most of them in the *Thanks* at the top of this readme) plus several other capabilities--if you're familiar with *React Loadable*--you already discerned. Secondly, it's built with a primary coupling to `webpack-flush-chunks` in mind, which brings everything full circle. They will stay updated together, etc. That said, you can use `webpack-flush-chunks` with React Loadable. If that's what you feel like doing, do it and get on with your life! However, this package has HMR which *React Loadable* doesn't. Those async imports, when using *React Loadable*, won't continue to update if you make some changes to them. Because of that, your developer experience will suffer and perhaps it's a good idea to just switch to `react-universal-component` sooner than later. That said, 2 months ago I put in a [PR](https://github.com/thejameskyle/react-loadable/pull/37) to give *React Loadable* HMR. I assume at some point it will get merged.
 
 - **[Vue](https://github.com/vuejs/vue):** Our options API basically mimics [Vue's new async components](https://vuejs.org/v2/guide/components.html#Advanced-Async-Components). This one really isn't a comparison, as if you're using Vue, you should use that. If you're using React you should use this. The one thing to point out is that you may notice that they specify their `component` property simply with `import()`, not `() => import()`. But if you look carefully, this is happening within the context of a function. Vue internally clearly doesn't call this function until render time, so as not to simply just load all your imports the moment the page loads (which defeats the purpose of code-splitting). You can achieve the same thing (i.e. simply passing a promise) if you wrap your *universal component* in a function that you also call when it's actually needed. See [require-universal-module](https://github.com/faceyspacey/require-universal-module) for more about that.
 
@@ -236,7 +259,7 @@ export default () => universal(asyncWork, {
 })
 ```
 
-If what you're saying to yourself is: "but how do you fetch the data on the server?" you'd be correct in having found the problem. The fact of the matter is *Async Reactor* offers no solution for server-rendering. So both solutions come with that caveat. That said, it's not a requirement that `react-universal-component` has to be used with server-rendering. If you wanted to use it just for it's async aspects, you could (just by leaving out both the `path` and `resolve` options). And therefore you could utilize the same pattern as Async Reactor. You just need to specify a dynamic `key` function that returns something different in each environment as shown above. 
+If what you're saying to yourself is: "but how do you synchronously fetch the data on the server?" you'd be correct in having found the problem. The fact of the matter is *Async Reactor* offers no solution for server-rendering. So both solutions come with that caveat. That said, it's not a requirement that `react-universal-component` has to be used with server-rendering. If you wanted to use it just for it's async aspects, you could (just by leaving out both the `path` and `resolve` options). And therefore you could utilize the same pattern as Async Reactor. You just need to specify a dynamic `key` function that returns something different in each environment as shown above. 
 
 That said, if we're still trying to achieve server-side rendering with this, there is something you can't do with `react-universal-component` that you can with `async-reactor`. That is in the latter you can have multiple module imports. In both you can have multiple async data-fetching tasks. However, here's the real thing: you actually shouldn't provide the `resolve` option, as on the server you will synchronously render something different than on the client (which leads to React checksum mismatches and re-rendering), since the client will have to display the `loading` component no matter what, while *all* async fetching is waited upon. Basically what it boils down to is rendering a `loading` component on the server and the same `loading` component on the client, and then additional async requests solely on the client. So, boom, you can do multiple module imports using `react-universal-component` in fact. You just have to forget all about synchronous rendering, and the result is you can do exactly what *Async Reactor* does. In fact, you can even specify `key: null` to always return the entire module, which in this case is `<Component />`.
 
@@ -268,7 +291,7 @@ Anyway, **what's the point in all this?**: a lot of work has been put into revie
 
 ## Contributing
 
-We use [commitizen](https://github.com/commitizen/cz-cli), so run `npm run cm` to make commits. A command-line form will appear, requiring you answer a few questions to automatically produce a nicely formatted commit. Releases, semantic version numbers, tags and changelogs will automatically be generated based on these commits thanks to [semantic-release](https://github.com/semantic-release/semantic-release). Be good.
+We use [commitizen](https://github.com/commitizen/cz-cli), so run `npm run cm` to make commits. A command-line form will appear, requiring you answer a few questions to automatically produce a nicely formatted commit. Releases, semantic version numbers, tags, changelogs and publishing to NPM will automatically be handled based on these commits thanks to [semantic-release](https://github.com/semantic-release/semantic-release). Be good.
 
 
 ## Tests

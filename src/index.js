@@ -34,6 +34,8 @@ type Props = {
 const DefaultLoading = () => <div>Loading...</div>
 const DefaultError = () => <div>Error!</div>
 
+const isServer = typeof window === 'undefined'
+
 export default function universalComponent<Props: Props>(
   component: AsyncComponent<Props>,
   opts: Options<Props> = {}
@@ -49,7 +51,7 @@ export default function universalComponent<Props: Props>(
 
   let Component = mod // initial syncronous require attempt done for us :)
 
-  return class Loadable extends React.Component<void, Props, *> {
+  return class UniversalComponent extends React.Component<void, Props, *> {
     _mounted: boolean
 
     static preload() {
@@ -74,10 +76,10 @@ export default function universalComponent<Props: Props>(
       this._mounted = true
       addModule() // record the module for SSR flushing :)
 
-      if (this.state.hasComponent) return
+      if (this.state.hasComponent || isServer) return
       const time = new Date()
 
-      requireAsync()
+      requireAsync(this.props)
         .then((mod: Object) => {
           Component = mod // for HMR updates component must be in closure
           const state = { hasComponent: !!Component }
@@ -87,7 +89,6 @@ export default function universalComponent<Props: Props>(
             const extraDelay = minDelay - timeLapsed
             return setTimeout(() => this.update(state), extraDelay)
           }
-
           this.update(state)
         })
         .catch(error => this.update({ error }))
@@ -108,20 +109,25 @@ export default function universalComponent<Props: Props>(
 
       // user-provided props (e.g. for data-fetching loading):
       if (isLoading) {
-        return <Loading {...props} />
+        return createElement(Loading, props)
       }
       else if (userError) {
-        return <Err {...props} error={userError} />
+        return createElement(Err, { ...props, error: userError })
       }
       else if (hasComponent && Component) {
         // primary usage (for async import loading + errors):
-        return <Component {...props} />
+        return createElement(Component, props)
       }
       else if (error) {
-        return <Err {...props} error={error} />
+        return createElement(Err, { ...props, error })
       }
 
-      return <Loading {...props} />
+      return createElement(Loading, props)
     }
   }
 }
+
+const createElement = (Component: any, props: Props) =>
+  React.isValidElement(Component)
+    ? React.cloneElement(Component, props)
+    : <Component {...props} />

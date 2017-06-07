@@ -4565,9 +4565,9 @@ require-uncached@^1.0.2:
     caller-path "^0.1.0"
     resolve-from "^1.0.0"
 
-require-universal-module@^1.1.1:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/require-universal-module/-/require-universal-module-1.1.1.tgz#bbadd17fb699b81708b58c73fe0a89ddf0df9df8"
+require-universal-module@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/require-universal-module/-/require-universal-module-1.2.0.tgz#25f9e8bd610f69a55973137c2f80691e156fac08"
 
 resolve-dir@^0.1.0:
   version "0.1.1"
@@ -4679,7 +4679,7 @@ sax@^1.2.1:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.2.tgz#fd8631a23bc7826bef5d871bdb87378c95647828"
 
-semantic-release@^6.3.2:
+semantic-release@^6.3.6:
   version "6.3.6"
   resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-6.3.6.tgz#629d0aec90b38a2957a57a4a9ee1214af51928c7"
   dependencies:
