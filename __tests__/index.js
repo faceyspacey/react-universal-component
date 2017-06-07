@@ -176,10 +176,10 @@ describe('other options', () => {
     const component = renderer.create(<Component />)
     expect(component.toJSON()).toMatchSnapshot() // initial
 
-    await waitFor(10)
+    await waitFor(5)
     expect(component.toJSON()).toMatchSnapshot() // loading
 
-    await waitFor(20)
+    await waitFor(30)
     expect(component.toJSON()).toMatchSnapshot() // success
   })
 
@@ -192,7 +192,7 @@ describe('other options', () => {
     const component = renderer.create(<Component />)
     expect(component.toJSON()).toMatchSnapshot() // initial
 
-    await waitFor(10)
+    await waitFor(5)
     expect(component.toJSON()).toMatchSnapshot() // loading
 
     await waitFor(20)

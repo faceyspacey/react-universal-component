@@ -23,7 +23,7 @@ type Options<Props> = {
   chunkName?: string,
   timeout?: number,
   key?: Key<Props>,
-  onLoad: OnLoad
+  onLoad?: OnLoad
 }
 
 type Props = {
