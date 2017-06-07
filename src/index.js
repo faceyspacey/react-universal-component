@@ -2,10 +2,14 @@
 import React from 'react'
 import req from 'require-universal-module'
 
-type GenericComponent<Props> = Class<React.Component<{}, Props, mixed>>
+type GenericComponent<Props> =
+  | Class<React.Component<{}, Props, mixed>>
+  | React$Element<any>
+
 type Component<Props> = GenericComponent<Props>
 type LoadingCompponent = GenericComponent<{}>
 type ErrorComponent = GenericComponent<{}>
+
 type AsyncComponent<Props> =
   | Promise<Component<Props>>
   | (() => Promise<Component<Props>>)

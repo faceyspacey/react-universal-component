@@ -127,6 +127,7 @@ All are optional except `resolve` and if you are using Babel on the server, you 
 
 
 **In Depth:**
+> All components can be components or elements (e.g: `Loading` or `<Loading />`)
 
 - `loading` is the component class or function corresponding to your stateless component that displays while the primary import is loading. While testing out this package, you can leave it out as a simple default one is used.
 
@@ -241,10 +242,10 @@ export default graphql(gql`
 - **[Async Reactor](https://github.com/xtuc/async-reactor):** Is a sweet solution that promotes stateless functional components and async data + import needs **all in one**. Ultimately the primary use case you can do with `react-universal-component` as well. That use-case is *data-fetching simultaneously while importing components* right along side your component definition (as a stateless component):
 
 ```js
-const asyncWork = async () => {
+const asyncWork = async (cb, props) => {
   const prom = await Promise.all([
-    import('./Component'),
-    fetch(`/data`)
+    import('./User'),
+    fetch(`/user?id=${props.id}`) // SECRET FEATURE: props are passed to async function for precisely this
   ])
 
   const Component = prom[0].default
@@ -253,15 +254,17 @@ const asyncWork = async () => {
   return <Component data={data} />
 }
 
-export default () => universal(asyncWork, {
-  resolve: () => require.resolveWeak('./Component'),
+const UniversalComponent = () => universal(asyncWork, {
+  resolve: () => require.resolveWeak('./User'),
   key: mod => mod.default || mod // default export on server || <Component /> on client
 })
+
+<UniversalComponent id={123} />
 ```
 
 If what you're saying to yourself is: "but how do you synchronously fetch the data on the server?" you'd be correct in having found the problem. The fact of the matter is *Async Reactor* offers no solution for server-rendering. So both solutions come with that caveat. That said, it's not a requirement that `react-universal-component` has to be used with server-rendering. If you wanted to use it just for it's async aspects, you could (just by leaving out both the `path` and `resolve` options). And therefore you could utilize the same pattern as Async Reactor. You just need to specify a dynamic `key` function that returns something different in each environment as shown above. 
 
-That said, if we're still trying to achieve server-side rendering with this, there is something you can't do with `react-universal-component` that you can with `async-reactor`. That is in the latter you can have multiple module imports. In both you can have multiple async data-fetching tasks. However, here's the real thing: you actually shouldn't provide the `resolve` option, as on the server you will synchronously render something different than on the client (which leads to React checksum mismatches and re-rendering), since the client will have to display the `loading` component no matter what, while *all* async fetching is waited upon. Basically what it boils down to is rendering a `loading` component on the server and the same `loading` component on the client, and then additional async requests solely on the client. So, boom, you can do multiple module imports using `react-universal-component` in fact. You just have to forget all about synchronous rendering, and the result is you can do exactly what *Async Reactor* does. In fact, you can even specify `key: null` to always return the entire module, which in this case is `<Component />`.
+That said, if we're still trying to achieve server-side rendering with this, there is something you can't do with `react-universal-component` that you can with `async-reactor`. That is in the latter you can have multiple module imports. In both you can have multiple async data-fetching tasks. However, here's the real thing: you actually shouldn't provide the `resolve` option, as on the server you will synchronously render something different than on the client (which leads to React checksum mismatches and re-rendering), since the client will have to display the `loading` component no matter what, while *all* async fetching is waited upon. Basically what it boils down to is rendering a `loading` component on the server and the same `loading` component on the client, and then additional async requests solely on the client. So, boom, you can do multiple module imports using `react-universal-component` in fact. You just have to forget all about synchronous rendering, and the result is you can do exactly what *Async Reactor* does. In fact, you can even specify `key: null` to always return the entire module, which in this case is `<UniversalComponent />`.
 
 To complete this thought--because *Async Reactor*, in how it potentially allows for multiple imports + data on the server is quite compelling--let's think about how this could all work synchronously on the server. Basically, you gotta do something like what *Apollo* does with regards to server rendering. Here's how they handle promise resolution within rendered components on the server:
 
@@ -287,6 +290,11 @@ What *Apollo* does here is fantastic, and to be clear: if you've designed your a
 I've seen ad hoc solutions that resolve promises and call `componentWillMount` async data fetching methods, and personally I'm against it. I recommend one of 2 solutions: use a routing solution (perhaps ad hoc) that determines your data needs and fetches them in parallel (`Promise.all`) and then dispatches the result as actions against your Redux store; ***and then render your app in one synchronous go***. OR secondly: use solutions dedicated to this problem like Meteor Development Group's *Apollo*. (Also, if it's not clear: this package will work perfectly with Apollo). The reason you're using Apollo is because it gets extreme value out of pairing your data-needs to components. With *Apollo*, you can use stateless component functions + slick HoCs--using `componentWillMount` and manually fetching data is a thing of the past. There's a trend of pairing data-needs to components, but I personally don't see it unless it's with GraphQL. If you're not using something like *Apollo*, figure out your data needs on the server and dispatch on your redux store before your single synchronous render. That's my conclusion and recommendation. The promise resolution stuff + sniffing out data fetching in `componentWillMount` is a mess unless someone else (*Apollo*) did it for you. I don't approve of ad hoc data-fetching in `componentWillMount`. I prefer my components truly pure unless it's with Apollo/Relay/Etc, other specialized HoCs or a [redux-specific routing solution](https://github.com/faceyspacey/redux-first-router) that handles it for you.
 
 Anyway, **what's the point in all this?**: a lot of work has been put into reviewing the trends, problems and all possible solutions so you don't have to. In the words of **@thejameskyle**, "use this shit!"
+
+
+## FAQ
+
+- **What about the Babel plugin from *React Loadable*?** Saving one or 2 lines is not something I'm concerned with. If it's something you want to maintain and keep up to date, feel free to make a PR. There is a [problem](https://github.com/thejameskyle/react-loadable/pull/43) with transpiling any HoCs you might make. Perhaps the fact that `asyncComponent` is its own argument may make this an easier problem to solve here than with *React Loadable*.
 
 
 ## Contributing
