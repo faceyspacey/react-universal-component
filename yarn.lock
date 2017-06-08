@@ -2167,9 +2167,9 @@ flat-cache@^1.2.1:
     graceful-fs "^4.1.2"
     write "^0.2.1"
 
-flow-bin@^0.45.0:
-  version "0.45.0"
-  resolved "https://registry.yarnpkg.com/flow-bin/-/flow-bin-0.45.0.tgz#009dd0f577a3f665c74ca8be827ae8c2dd8fd6b5"
+flow-bin@^0.47.0:
+  version "0.47.0"
+  resolved "https://registry.yarnpkg.com/flow-bin/-/flow-bin-0.47.0.tgz#a2a08ab3e0d1f1cb57d17e27b30b118b62fda367"
 
 flow-copy-source@^1.1.0:
   version "1.1.0"
@@ -4565,9 +4565,9 @@ require-uncached@^1.0.2:
     caller-path "^0.1.0"
     resolve-from "^1.0.0"
 
-require-universal-module@^1.1.1:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/require-universal-module/-/require-universal-module-1.1.1.tgz#bbadd17fb699b81708b58c73fe0a89ddf0df9df8"
+require-universal-module@^1.2.5:
+  version "1.2.5"
+  resolved "https://registry.yarnpkg.com/require-universal-module/-/require-universal-module-1.2.5.tgz#d9689400e1937b28cfef7e6cd0b925a150de4700"
 
 resolve-dir@^0.1.0:
   version "0.1.1"
@@ -4679,7 +4679,7 @@ sax@^1.2.1:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.2.tgz#fd8631a23bc7826bef5d871bdb87378c95647828"
 
-semantic-release@^6.3.2:
+semantic-release@^6.3.6:
   version "6.3.6"
   resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-6.3.6.tgz#629d0aec90b38a2957a57a4a9ee1214af51928c7"
   dependencies:

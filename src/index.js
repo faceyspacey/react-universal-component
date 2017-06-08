@@ -2,14 +2,20 @@
 import React from 'react'
 import req from 'require-universal-module'
 
-type GenericComponent<Props> = Class<React.Component<{}, Props, mixed>>
+type GenericComponent<Props> =
+  | Class<React.Component<{}, Props, mixed>>
+  | React$Element<any>
+
 type Component<Props> = GenericComponent<Props>
 type LoadingCompponent = GenericComponent<{}>
 type ErrorComponent = GenericComponent<{}>
+
 type AsyncComponent<Props> =
   | Promise<Component<Props>>
   | (() => Promise<Component<Props>>)
 type Key<Props> = string | null | ((module: Object) => Component<Props>)
+type OnLoad = (module: Object) => void
+
 type Options<Props> = {
   loading?: LoadingCompponent,
   error?: ErrorComponent,
@@ -20,13 +26,21 @@ type Options<Props> = {
   path?: string,
   chunkName?: string,
   timeout?: number,
-  key?: Key<Props>
+  key?: Key<Props>,
+  onLoad?: OnLoad
+}
+
+type Props = {
+  error?: ?any,
+  isLoading?: ?boolean
 }
 
 const DefaultLoading = () => <div>Loading...</div>
 const DefaultError = () => <div>Error!</div>
 
-export default function Loadable<Props: {}>(
+const isServer = typeof window === 'undefined'
+
+export default function universal<Props: Props>(
   component: AsyncComponent<Props>,
   opts: Options<Props> = {}
 ) {
@@ -41,7 +55,7 @@ export default function Loadable<Props: {}>(
 
   let Component = mod // initial syncronous require attempt done for us :)
 
-  return class Loadable extends React.Component<void, Props, *> {
+  return class UniversalComponent extends React.Component<void, Props, *> {
     _mounted: boolean
 
     static preload() {
@@ -66,10 +80,10 @@ export default function Loadable<Props: {}>(
       this._mounted = true
       addModule() // record the module for SSR flushing :)
 
-      if (this.state.hasComponent) return
+      if (this.state.hasComponent || isServer) return
       const time = new Date()
 
-      requireAsync()
+      requireAsync(this.props)
         .then((mod: Object) => {
           Component = mod // for HMR updates component must be in closure
           const state = { hasComponent: !!Component }
@@ -79,7 +93,6 @@ export default function Loadable<Props: {}>(
             const extraDelay = minDelay - timeLapsed
             return setTimeout(() => this.update(state), extraDelay)
           }
-
           this.update(state)
         })
         .catch(error => this.update({ error }))
@@ -96,15 +109,29 @@ export default function Loadable<Props: {}>(
 
     render() {
       const { error, hasComponent } = this.state
+      const { isLoading, error: userError, ...props } = this.props
 
-      if (hasComponent && Component) {
-        return <Component {...this.props} />
+      // user-provided props (e.g. for data-fetching loading):
+      if (isLoading) {
+        return createElement(Loading, props)
+      }
+      else if (userError) {
+        return createElement(Err, { ...props, error: userError })
+      }
+      else if (hasComponent && Component) {
+        // primary usage (for async import loading + errors):
+        return createElement(Component, props)
       }
       else if (error) {
-        return <Err {...this.props} error={error} />
+        return createElement(Err, { ...props, error })
       }
 
-      return <Loading {...this.props} />
+      return createElement(Loading, props)
     }
   }
 }
+
+const createElement = (Component: any, props: Props) =>
+  React.isValidElement(Component)
+    ? React.cloneElement(Component, props)
+    : <Component {...props} />

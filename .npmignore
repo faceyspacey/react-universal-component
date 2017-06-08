@@ -17,3 +17,4 @@ wallaby.js
 webpack.config.js
 .eslintignore
 .flowconfig
+*.png

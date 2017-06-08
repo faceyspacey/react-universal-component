@@ -18,8 +18,8 @@ import {
 
 describe('async lifecycle', () => {
   it('loading', async () => {
-    const importAsync = createComponent(40, MyComponent)
-    const Component = universalComponent(importAsync)
+    const asyncComponent = createComponent(40, MyComponent)
+    const Component = universalComponent(asyncComponent)
 
     const component1 = renderer.create(<Component />)
     expect(component1.toJSON()).toMatchSnapshot() // initial
@@ -36,8 +36,8 @@ describe('async lifecycle', () => {
   })
 
   it('error', async () => {
-    const importAsync = createComponent(40, null, new Error('test error'))
-    const Component = universalComponent(importAsync)
+    const asyncComponent = createComponent(40, null, new Error('test error'))
+    const Component = universalComponent(asyncComponent)
 
     const component = renderer.create(<Component />)
     expect(component.toJSON()).toMatchSnapshot() // initial
@@ -50,8 +50,8 @@ describe('async lifecycle', () => {
   })
 
   it('timeout error', async () => {
-    const importAsync = createComponent(40, null, new Error('test error'))
-    const Component = universalComponent(importAsync, {
+    const asyncComponent = createComponent(40, null, new Error('test error'))
+    const Component = universalComponent(asyncComponent, {
       timeout: 10
     })
 
@@ -63,8 +63,8 @@ describe('async lifecycle', () => {
   })
 
   it('component unmounted: setState not called', async () => {
-    const importAsync = createComponent(10, MyComponent)
-    const Component = universalComponent(importAsync)
+    const asyncComponent = createComponent(10, MyComponent)
+    const Component = universalComponent(asyncComponent)
 
     let instance
     const component = renderer.create(<Component ref={i => (instance = i)} />)
@@ -80,8 +80,8 @@ describe('async lifecycle', () => {
 
 describe('props: all components receive props', () => {
   it('custom loading component', async () => {
-    const importAsync = createComponent(40, MyComponent)
-    const Component = universalComponent(importAsync, {
+    const asyncComponent = createComponent(40, MyComponent)
+    const Component = universalComponent(asyncComponent, {
       loading: Loading
     })
 
@@ -100,8 +100,8 @@ describe('props: all components receive props', () => {
   })
 
   it('custom error component', async () => {
-    const importAsync = createComponent(40, null, new Error('test error'))
-    const Component = universalComponent(importAsync, {
+    const asyncComponent = createComponent(40, null, new Error('test error'))
+    const Component = universalComponent(asyncComponent, {
       error: Err
     })
 
@@ -118,12 +118,95 @@ describe('props: all components receive props', () => {
 
     expect(component2.toJSON()).toMatchSnapshot() // loading again..
   })
+
+  it('<MyUniversalComponent isLoading /> - also displays loading component', async () => {
+    const asyncComponent = createComponent(40, MyComponent)
+    const Component = universalComponent(asyncComponent)
+
+    const component1 = renderer.create(<Component isLoading />)
+    expect(component1.toJSON()).toMatchSnapshot() // initial
+
+    await waitFor(50)
+    expect(component1.toJSON()).toMatchSnapshot() // loading even though async component is available
+  })
+
+  it('<MyUniversalComponent error={new Error} /> - also displays error component', async () => {
+    const asyncComponent = createComponent(40, MyComponent)
+    const Component = universalComponent(asyncComponent, { error: Err })
+
+    const component1 = renderer.create(<Component error={new Error('ah')} />)
+    expect(component1.toJSON()).toMatchSnapshot() // initial
+
+    await waitFor(50)
+    expect(component1.toJSON()).toMatchSnapshot() // error even though async component is available
+  })
+
+  it('components passed as elements: loading', async () => {
+    const asyncComponent = createComponent(40, <MyComponent />)
+    const Component = universalComponent(asyncComponent, {
+      loading: <Loading />
+    })
+
+    const component1 = renderer.create(<Component prop='foo' />)
+    expect(component1.toJSON()).toMatchSnapshot() // initial
+
+    await waitFor(20)
+    expect(component1.toJSON()).toMatchSnapshot() // loading
+
+    await waitFor(20)
+    expect(component1.toJSON()).toMatchSnapshot() // loaded
+
+    const component2 = renderer.create(<Component prop='bar' />)
+
+    expect(component2.toJSON()).toMatchSnapshot() // reload
+  })
+
+  it('components passed as elements: error', async () => {
+    const asyncComponent = createComponent(40, null, new Error('test error'))
+    const Component = universalComponent(asyncComponent, {
+      error: <Err />
+    })
+
+    const component1 = renderer.create(<Component prop='foo' />)
+    expect(component1.toJSON()).toMatchSnapshot() // initial
+
+    await waitFor(20)
+    expect(component1.toJSON()).toMatchSnapshot() // loading
+
+    await waitFor(20)
+    expect(component1.toJSON()).toMatchSnapshot() // Error!
+
+    const component2 = renderer.create(<Component prop='bar' />)
+
+    expect(component2.toJSON()).toMatchSnapshot() // loading again...
+  })
+
+  it('arguments/props passed to asyncComponent function for data-fetching', async () => {
+    const asyncComponent = async (cb, props) => {
+      // this is what you would actually be doing here:
+      // const data = await fetch(`/path?key=${props.prop}`)
+      // const value = await data.json()
+
+      const value = props.prop
+      const component = await Promise.resolve(<div>{value}</div>)
+      return component
+    }
+    const Component = universalComponent(asyncComponent, {
+      key: null
+    })
+
+    const component1 = renderer.create(<Component prop='foo' />)
+    expect(component1.toJSON()).toMatchSnapshot() // initial
+
+    await waitFor(10)
+    expect(component1.toJSON()).toMatchSnapshot() // loaded
+  })
 })
 
 describe('server-side rendering', () => {
   it('es6: default export automatically resolved', async () => {
-    const importAsync = createComponent(40, null, new Error('test error'))
-    const Component = universalComponent(importAsync, {
+    const asyncComponent = createComponent(40, null, new Error('test error'))
+    const Component = universalComponent(asyncComponent, {
       path: path.join(__dirname, '../__fixtures__/component')
     })
 
@@ -133,8 +216,8 @@ describe('server-side rendering', () => {
   })
 
   it('es5: module.exports resolved', async () => {
-    const importAsync = createComponent(40, null, new Error('test error'))
-    const Component = universalComponent(importAsync, {
+    const asyncComponent = createComponent(40, null, new Error('test error'))
+    const Component = universalComponent(asyncComponent, {
       path: path.join(__dirname, '../__fixtures__/component.es5')
     })
 
@@ -146,31 +229,31 @@ describe('server-side rendering', () => {
 
 describe('other options', () => {
   it('key (string): resolves export to value of key', async () => {
-    const importAsync = createComponent(20, { fooKey: MyComponent })
-    const Component = universalComponent(importAsync, {
+    const asyncComponent = createComponent(20, { fooKey: MyComponent })
+    const Component = universalComponent(asyncComponent, {
       key: 'fooKey'
     })
 
     const component = renderer.create(<Component />)
     expect(component.toJSON()).toMatchSnapshot() // initial
 
-    await waitFor(10)
+    await waitFor(5)
     expect(component.toJSON()).toMatchSnapshot() // loading
 
-    await waitFor(20)
+    await waitFor(30)
     expect(component.toJSON()).toMatchSnapshot() // success
   })
 
   it('key (function): resolves export to function return', async () => {
-    const importAsync = createComponent(20, { fooKey: MyComponent })
-    const Component = universalComponent(importAsync, {
+    const asyncComponent = createComponent(20, { fooKey: MyComponent })
+    const Component = universalComponent(asyncComponent, {
       key: module => module.fooKey
     })
 
     const component = renderer.create(<Component />)
     expect(component.toJSON()).toMatchSnapshot() // initial
 
-    await waitFor(10)
+    await waitFor(5)
     expect(component.toJSON()).toMatchSnapshot() // loading
 
     await waitFor(20)
@@ -180,8 +263,8 @@ describe('other options', () => {
   it('onLoad (async): is called and passed entire module', async () => {
     const onLoad = jest.fn()
     const mod = { __esModule: true, default: MyComponent }
-    const importAsync = createComponent(40, mod)
-    const Component = universalComponent(importAsync, {
+    const asyncComponent = createComponent(40, mod)
+    const Component = universalComponent(asyncComponent, {
       onLoad,
       key: 'default'
     })
@@ -194,8 +277,8 @@ describe('other options', () => {
 
   it('onLoad (sync): is called and passed entire module', async () => {
     const onLoad = jest.fn()
-    const importAsync = createComponent(40)
-    const Component = universalComponent(importAsync, {
+    const asyncComponent = createComponent(40)
+    const Component = universalComponent(asyncComponent, {
       onLoad,
       key: 'default',
       path: path.join(__dirname, '..', '__fixtures__', 'component')
@@ -207,18 +290,18 @@ describe('other options', () => {
   })
 
   it('minDelay: loads for duration of minDelay even if component ready', async () => {
-    const importAsync = createComponent(40, MyComponent)
-    const Component = universalComponent(importAsync, {
-      minDelay: 50
+    const asyncComponent = createComponent(40, MyComponent)
+    const Component = universalComponent(asyncComponent, {
+      minDelay: 60
     })
 
     const component = renderer.create(<Component />)
     expect(component.toJSON()).toMatchSnapshot() // initial
 
-    await waitFor(41)
+    await waitFor(45)
     expect(component.toJSON()).toMatchSnapshot() // still loading
 
-    await waitFor(20)
+    await waitFor(30)
     expect(component.toJSON()).toMatchSnapshot() // loaded
   })
 })
@@ -280,8 +363,8 @@ describe('SSR flushing: flushModuleIds() + flushChunkNames()', () => {
 })
 
 test('Component.preload: static preload method pre-fetches chunk', async () => {
-  const importAsync = createComponent(40, MyComponent)
-  const Component = universalComponent(importAsync)
+  const asyncComponent = createComponent(40, MyComponent)
+  const Component = universalComponent(asyncComponent)
 
   Component.preload()
   await waitFor(20)
