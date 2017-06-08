@@ -40,7 +40,7 @@ const DefaultError = () => <div>Error!</div>
 
 const isServer = typeof window === 'undefined'
 
-export default function universalComponent<Props: Props>(
+export default function universal<Props: Props>(
   component: AsyncComponent<Props>,
   opts: Options<Props> = {}
 ) {

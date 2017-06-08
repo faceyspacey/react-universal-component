@@ -127,7 +127,7 @@ All are optional except `resolve` and if you are using Babel on the server, you 
 
 
 **In Depth:**
-> All components can be components or elements (e.g: `Loading` or `<Loading />`)
+> All components can be classes/functions or elements (e.g: `Loading` or `<Loading />`)
 
 - `loading` is the component class or function corresponding to your stateless component that displays while the primary import is loading. While testing out this package, you can leave it out as a simple default one is used.
 
@@ -289,12 +289,53 @@ What *Apollo* does here is fantastic, and to be clear: if you've designed your a
 
 I've seen ad hoc solutions that resolve promises and call `componentWillMount` async data fetching methods, and personally I'm against it. I recommend one of 2 solutions: use a routing solution (perhaps ad hoc) that determines your data needs and fetches them in parallel (`Promise.all`) and then dispatches the result as actions against your Redux store; ***and then render your app in one synchronous go***. OR secondly: use solutions dedicated to this problem like Meteor Development Group's *Apollo*. (Also, if it's not clear: this package will work perfectly with Apollo). The reason you're using Apollo is because it gets extreme value out of pairing your data-needs to components. With *Apollo*, you can use stateless component functions + slick HoCs--using `componentWillMount` and manually fetching data is a thing of the past. There's a trend of pairing data-needs to components, but I personally don't see it unless it's with GraphQL. If you're not using something like *Apollo*, figure out your data needs on the server and dispatch on your redux store before your single synchronous render. That's my conclusion and recommendation. The promise resolution stuff + sniffing out data fetching in `componentWillMount` is a mess unless someone else (*Apollo*) did it for you. I don't approve of ad hoc data-fetching in `componentWillMount`. I prefer my components truly pure unless it's with Apollo/Relay/Etc, other specialized HoCs or a [redux-specific routing solution](https://github.com/faceyspacey/redux-first-router) that handles it for you.
 
+Now that all said, and taking into consideration *Next.js*, if the Apollo-style promise resolution was built into, say, *Webpack Flush Chunks* as another flushing technique, it would be the final nail in *Next.js's* coffin, as far as the greater NPM/React community is concerned. See, along with SSR + code-splitting + pre-fetching, their initial innovation was universal async data-fetching resolution: https://github.com/zeit/next.js#fetching-data-and-component-lifecycle ...What you're looking at there is the 2 function technique (`getInitialProps` + render function) that *Next.js* does to do what *Async Reactor* (and this package) can do in a single function by combining any async needs with a returned component. In ours you could return a function that returns a React component to continue to receive props from its parent, eg: 
+
+``js
+const asyncWork = async (cb, props) => {
+  const prom = await Promise.all([
+    import('./User'),
+    fetch(`/user?id=${props.id}`) // SECRET FEATURE: props are passed to async function for precisely this
+  ])
+
+  const Component = prom[0].default
+  const data = await prom[1].json()
+
+  return props => <Component data={data} {...props} />
+}
+
+const UniversalComponent = () => universal(asyncWork, { asyncOnly: true } )
+```
+> This gets props from the same place (its parent), but it uses them in 2 different stages: once to get the initial data + modules to dynamically generate a component, and any time the parent updates props thereafter.
+
+Sweet, huh! The only thing we're missing is the server-side aspect. I'm pretty happy with Apollo, but that requires GraphQL. So there is a bonafied need for this since it's my opinion that REST is here to stay for a wide variety of use cases. My apps gotta be pretty complex before I consider using Apollo. If someone wanted to provide PRs to this package and *Webpack Flush Chunks* I'd happily merge it and would work with them to polish it. What you need is a flag in the options to `universal` like `asyncOnly` to tell it that it won't be using synchronous module resolution (super simple) or just detection of the lack of `resolve` prop (even better), and then *Webpack Flush Chunks* needs something like Apollo's `await renderToStringWithData(app)`:
+
+https://github.com/apollographql/react-apollo/blob/af2aac22d8e45aa7e3c30630b8cbbec27e30f2c1/src/server.ts#L126
+
+That's basically all the code that's needed. Hell, I wonder if we simply added a `fetchData` method (like Apollo expects) to `ReactUniversalComponent`, if we could just run `renderToStringWithData` on our component tree and it would work lol. There seems to be no Apollo-specific code, just promise resolution. See the expected `fetcData` method on component instances here:
+
+https://github.com/apollographql/react-apollo/blob/af2aac22d8e45aa7e3c30630b8cbbec27e30f2c1/src/server.ts#L111
+
+*The change we'd need to make:*
+```js
+export default function universal(asyncComponent, options) {
+  // ..
+  return class UniversalComponent extends React.Component {
+    fetchData() {
+      return requireAsync()
+    }
+    // ...
+```
+
+**Insane! Stay tuned ;)**
+
+
 Anyway, **what's the point in all this?**: a lot of work has been put into reviewing the trends, problems and all possible solutions so you don't have to. In the words of **@thejameskyle**, "use this shit!"
 
 
 ## FAQ
 
-- **What about the Babel plugin from *React Loadable*?** Saving one or 2 lines is not something I'm concerned with. If it's something you want to maintain and keep up to date, feel free to make a PR. There is a [problem](https://github.com/thejameskyle/react-loadable/pull/43) with transpiling any HoCs you might make. Perhaps the fact that `asyncComponent` is its own argument may make this an easier problem to solve here than with *React Loadable*.
+- **What about the Babel plugin from *React Loadable*?** Saving one or 2 lines is not something I'm concerned with. If it's something you want to maintain and keep up to date, feel free to make a PR. There is a [problem](https://github.com/thejameskyle/react-loadable/pull/43) with transpiling any HoCs you might make which wrap calls to `universal`. Perhaps the fact that `asyncComponent` is its own argument may make this an easier problem to solve here than with *React Loadable*.
 
 
 ## Contributing
