@@ -1,3 +1,37 @@
+<p align="center">
+  <a href="https://www.npmjs.com/package/react-universal-component">
+    <img src="https://img.shields.io/npm/v/react-universal-component.svg" alt="Version" />
+  </a>
+
+  <a href="https://travis-ci.org/faceyspacey/react-universal-component">
+    <img src="https://travis-ci.org/faceyspacey/react-universal-component.svg?branch=master" alt="Build Status" />
+  </a>
+
+  <a href="https://lima.codeclimate.com/github/faceyspacey/react-universal-component/coverage">
+    <img src="https://lima.codeclimate.com/github/faceyspacey/react-universal-component/badges/coverage.svg" alt="Coverage Status"/>
+  </a>
+
+  <a href="https://greenkeeper.io">
+    <img src="https://badges.greenkeeper.io/faceyspacey/react-universal-component.svg" alt="Green Keeper" />
+  </a>
+
+  <a href="https://lima.codeclimate.com/github/faceyspacey/react-universal-component">
+    <img src="https://lima.codeclimate.com/github/faceyspacey/react-universal-component/badges/gpa.svg" alt="GPA" />
+  </a>
+
+  <a href="https://www.npmjs.com/package/react-universal-component">
+    <img src="https://img.shields.io/npm/dt/react-universal-component.svg" alt="Downloads" />
+  </a>
+
+  <a href="https://www.npmjs.com/package/react-universal-component">
+    <img src="https://img.shields.io/npm/l/react-universal-component.svg" alt="License" />
+  </a>
+
+  <a href="https://gitter.im/react-universal-component">
+    <img src="https://img.shields.io/gitter/room/nwjs/nw.js.svg" alt="Gitter Chat" />
+  </a>
+</p>
+
 # React Universal Component
 
 A simplified combination async/sync ("Universal") component inspired by React Loadable and other developments in the React/Webpack world, particularly [Webpack Flush Chunks](https://github.com/faceyspacey/webpack-flush-chunks). 
