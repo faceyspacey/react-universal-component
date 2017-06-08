@@ -13,7 +13,7 @@ type ErrorComponent = GenericComponent<{}>
 type AsyncComponent<Props> =
   | Promise<Component<Props>>
   | (() => Promise<Component<Props>>)
-type Key<Props> = string | null | ((module: Object) => Component<Props>)
+type Key<Props> = string | null | ((module: ?Object) => Component<Props>)
 type OnLoad = (module: Object) => void
 
 type Options<Props> = {
