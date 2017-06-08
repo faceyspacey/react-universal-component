@@ -76,9 +76,9 @@ That said, in combination with several other packages and the developments menti
 
 ***Quick story:*** basically I started on this journey to pick up where React Loadable left off and handle the challenge of serving the chunks corresponding to modules flushed by React Loadable. See, React Loadable only knows what modules were used, but not what chunks, and definitely not the corresponding scripts and stylesheets. And so [Webpack Flush Chunks](https://github.com/faceyspacey/webpack-flush-chunks) was born. Though Webpack's *"magic comment"* feature greatly simplifies pinpointing what chunks were used to render your *universal* component, *Webpack Flush Chunks* jumps through many hoops to determine what chunks to send from the server by triangulating what modules were rendered with the information of your webpack stats. It also must work with both Babel and Webpack servers. It must handle CSS chunks, and it must have first class support for HMR. After investing much time solving these problems--something I didn't really plan--the whole "stack" corresponding to this problem became important to me, and so I dreamt up what the ideal *universal* component should be, learning from all recent developments, and built it :). 
 
-I won't go into much more about all the problems solved by the family of packages necessary to make this happen, so I'll point you to the Medium article where I describe it all
+I won't go into much more about all the problems solved by the family of packages necessary to make this happen, so I'll point you to the Medium article where I describe it all:
 
-http://medium.com/@faceyspacey/foobar
+https://medium.com/@faceyspacey/code-cracked-for-code-splitting-ssr-in-reactlandia-react-loadable-webpack-flush-chunks-and-1a6b0112a8b8
 
 ## Other Packages you will need
 
