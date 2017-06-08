@@ -263,6 +263,24 @@ export default graphql(gql`
 > If it's not clear, the ***same*** `loading` component will show while both async aspects load, without flinching/re-rendering. And perhaps more importantly **they will be run in parallel**.
 
 
+## Externals
+
+If you're specifying externals to leave unbundled, you need to tell Webpack
+to still bundle `react-universal-component`, `webpack-flush-chunks` and
+`require-universal-module` so that they know they are running
+within Webpack. For example:
+
+```js
+const externals = fs
+  .readdirSync(modeModules)
+  .filter(x => !/\.bin|require-universal-module|webpack-flush-chunks/.test(x))
+  .reduce((externals, mod) => {
+    externals[mod] = `commonjs ${mod}`
+    return externals
+  }, {})
+```
+
+
 ## Comparison to Other "Universal" Rendering Solutions
 
 - **[Next.js](https://github.com/zeit/next.js):** CON: You gotta use a framework. Before this and `webpack-flush-chunks` came out, Next.js was the only game in town. If you're building a large custom app and/or are an expert in Webpack already, I wouldn't recommend sacrificing control to take on a framework. If you're new to Webpack, NPM, javascript development in general or you're a novice to intermediate developer it may be a fine option. Next.js started out only with route-based SSR + code-splitting in the fall of 2016. In the spring of 2017 they cracked the same nut that all this does as well, but, again, you're confined to the opinions, capabilities/limitations and potential workarounds that are typical of using a framework.
