@@ -182,7 +182,7 @@ describe('props: all components receive props', () => {
   })
 
   it('arguments/props passed to asyncComponent function for data-fetching', async () => {
-    const asyncComponent = async (cb, props) => {
+    const asyncComponent = async (props, cb) => {
       // this is what you would actually be doing here:
       // const data = await fetch(`/path?key=${props.prop}`)
       // const value = await data.json()

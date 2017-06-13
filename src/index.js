@@ -2,6 +2,8 @@
 import React from 'react'
 import req from 'require-universal-module'
 
+type Id = string
+
 type GenericComponent<Props> =
   | Class<React.Component<{}, Props, mixed>>
   | React$Element<any>
@@ -15,15 +17,15 @@ type AsyncComponent<Props> =
   | (() => Promise<Component<Props>>)
 type Key<Props> = string | null | ((module: ?Object) => Component<Props>)
 type OnLoad = (module: Object) => void
-
+type PathResolve = Id | (() => Id)
 type Options<Props> = {
   loading?: LoadingCompponent,
   error?: ErrorComponent,
   minDelay?: number,
 
   // options for requireAsyncModule:
-  resolve?: string | (() => number),
-  path?: string,
+  resolve?: PathResolve,
+  path?: PathResolve,
   chunkName?: string,
   timeout?: number,
   key?: Key<Props>,

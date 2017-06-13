@@ -69,7 +69,7 @@
     ]
   },
   "dependencies": {
-    "require-universal-module": "^1.2.5"
+    "require-universal-module": "^1.2.8"
   },
   "repository": {
     "type": "git",
