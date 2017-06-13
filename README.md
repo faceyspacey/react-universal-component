@@ -163,7 +163,7 @@ All are optional except `resolve` and if you are using Babel on the server, you 
 **In Depth:**
 > All components can be classes/functions or elements (e.g: `Loading` or `<Loading />`)
 
-- `asyncComponent` in fact takes a `props` argument, which you can use to dynamically determine what to require. E.g: `(props) => import('/asyncComponents/'+props.page)`. This is called a "dynamic require." See Webpack's [lazy import mode](https://webpack.js.org/guides/code-splitting-async/#import-mode). This is very useful for userland HoCs. However there is an [issue with resolveWeak](https://github.com/webpack/webpack/issues/4993) being able to do the same. **@sokra** prioritized it, but please vote it up. For now you use `props` just for *async-only* components. Also, if you want to use the callback format with `require.ensure`, is here's how you do it:
+- `asyncComponent` in fact takes a `props` argument, which you can use to dynamically determine what to require. E.g: `(props) => import('/asyncComponents/'+props.page)`. This is called a "dynamic require." See Webpack's [lazy import mode](https://webpack.js.org/guides/code-splitting-async/#import-mode). This is very useful for userland HoCs. However there is an [issue with resolveWeak](https://github.com/webpack/webpack/issues/4993) being able to do the same. **@sokra** prioritized it, but please vote it up. For now you use `props` just for *async-only* components. Also, if you want to use the callback format with `require.ensure`, here's how you do it:
 
 ```js
 (props, cb) => require.ensure([], require => cb(null, require('./Foo')))
