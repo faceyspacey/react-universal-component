@@ -69,6 +69,8 @@ export default function universal<Props: Props>(
 
       if (!Component) {
         // try one more syncronous require, in case chunk comes after main.js
+        // HMR won't work if you've setup your app this way. `mod` must be
+        // assigned to `Component` in the closure for HMR to work.
         Component = requireSync()
       }
 

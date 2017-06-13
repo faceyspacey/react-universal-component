@@ -300,7 +300,7 @@ const externals = fs
 - **[Async Reactor](https://github.com/xtuc/async-reactor):** Is a sweet solution that promotes stateless functional components and async data + import needs **all in one**. Ultimately the primary use case you can do with `react-universal-component` as well. That use-case is *data-fetching simultaneously while importing components* right along side your component definition (as a stateless component):
 
 ```js
-const asyncWork = async (cb, props) => {
+const asyncWork = async props => {
   const prom = await Promise.all([
     import('./User'),
     fetch(`/user?id=${props.id}`) // SECRET FEATURE: props are passed to async function for precisely this
@@ -350,7 +350,7 @@ I've seen ad hoc solutions that resolve promises and call `componentWillMount` a
 Now that all said, and taking into consideration *Next.js*, if the Apollo-style promise resolution was built into, say, *Webpack Flush Chunks* as another flushing technique, it would be the final nail in *Next.js's* coffin, as far as the greater NPM/React community is concerned. See, along with SSR + code-splitting + pre-fetching, their initial innovation was universal async data-fetching resolution: https://github.com/zeit/next.js#fetching-data-and-component-lifecycle ...What you're looking at there is the 2 function technique (`getInitialProps` + render function) that *Next.js* does to do what *Async Reactor* (and this package) can do in a single function by combining any async needs with a returned component. In ours you could return a function that returns a React component to continue to receive props from its parent, eg: 
 
 ```js
-const asyncWork = async (cb, props) => {
+const asyncWork = async props => {
   const prom = await Promise.all([
     import('./User'),
     fetch(`/user?id=${props.id}`)
