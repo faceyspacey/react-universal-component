@@ -86,7 +86,7 @@ export default function universal<Props: Props>(
       const time = new Date()
 
       requireAsync(this.props)
-        .then((mod: Object) => {
+        .then((mod: ?any) => {
           Component = mod // for HMR updates component must be in closure
           const state = { hasComponent: !!Component }
 
