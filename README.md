@@ -84,9 +84,12 @@ https://medium.com/@faceyspacey/code-cracked-for-code-splitting-ssr-in-reactland
 
 https://github.com/faceyspacey/webpack-flush-chunks
 
-*and if you want stylesheets chunks:*
+*and if you want stylesheet chunks:*
 
 https://github.com/faceyspacey/extract-css-chunks-webpack-plugin
+
+*and if you want code-splitting support in your router:*
+[redux-first-router](https://github.com/faceyspacey/redux-first-router)
 
 Study [Webpack Flush Chunks](https://github.com/faceyspacey/webpack-flush-chunks) and its corresponding boilerplates to gain mastery of the webpack configuration you will need to bring this all together. 
 
