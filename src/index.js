@@ -17,6 +17,7 @@ type AsyncComponent<Props> =
   | (() => Promise<Component<Props>>)
 type Key<Props> = string | null | ((module: ?Object) => Component<Props>)
 type OnLoad = (module: Object) => void
+type OnError = (error: Object) => void
 type PathResolve = Id | (() => Id)
 type Options<Props> = {
   loading?: LoadingCompponent,
@@ -29,7 +30,8 @@ type Options<Props> = {
   chunkName?: string,
   timeout?: number,
   key?: Key<Props>,
-  onLoad?: OnLoad
+  onLoad?: OnLoad,
+  onError?: OnError
 }
 
 type Props = {
