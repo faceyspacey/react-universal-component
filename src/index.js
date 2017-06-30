@@ -64,7 +64,7 @@ export default function universal<Props: Props>(
     _mounted: boolean
 
     static preload(props?: Props) {
-      requireAsync(props).catch(e => {
+      return requireAsync(props).catch(e => {
         if (DEV) console.warn('[react-universal-component] preload failed:', e)
       })
     }
