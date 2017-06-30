@@ -61,7 +61,7 @@ export default function universal<Props: Props>(
     _mounted: boolean
 
     static preload() {
-      requireAsync()
+      requireAsync().catch(() => {})
     }
 
     constructor(props: Props) {
