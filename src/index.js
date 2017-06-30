@@ -41,6 +41,7 @@ const DefaultLoading = () => <div>Loading...</div>
 const DefaultError = () => <div>Error!</div>
 
 const isServer = typeof window === 'undefined'
+const DEV = process.env.NODE_ENV === 'development'
 
 export default function universal<Props: Props>(
   component: AsyncComponent<Props>,
@@ -61,7 +62,9 @@ export default function universal<Props: Props>(
     _mounted: boolean
 
     static preload() {
-      requireAsync().catch(() => {})
+      requireAsync().catch(e => {
+        if (DEV) console.warn('[react-universal-component] preload failed:', e)
+      })
     }
 
     constructor(props: Props) {
