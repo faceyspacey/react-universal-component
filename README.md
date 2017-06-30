@@ -160,6 +160,7 @@ All are optional except `resolve` and if you are using Babel on the server, you 
 - `chunkName`: `'myChunkName'` 
 - `timeout`: `15000` -- *default*
 - `onLoad`: `module => doSomething(module)
+- `onError`: `error => handleError(error)
 - `minDelay`: `0` -- *default*
 
 
@@ -187,6 +188,8 @@ All are optional except `resolve` and if you are using Babel on the server, you 
 - `timeout` allows you to specify a maximum amount of time before the `error` component is displayed. The default is 15 seconds.
 
 - `onLoad` is a callback function that receives the *entire* module. It allows you to export and put to use things other than your `default` component export, like reducers, sagas, etc. E.g: `onLoad: module => store.replaceReducer({ ...otherReducers, foo: module.fooReducer })`.
+
+- `onError` is a callback called if async imports fail. It does not apply to sync requires.
 
 - `minDelay` is essentially the minimum amount of time the loading component will always show for. It's a different take on what *React Loadable* and Vue are doing, where no loading component will show for a given amount of milliseconds to avoid janky flashing between the `loading` component and the async component. What this offers is a controlled solution that is the most responsive. Rather than have a certain amount of milliseconds go by where nothing is shown, the loading component is shown instantly. It puts the control back in your hands for how the lifecycle from *render* to *loading* to *loaded* feels. In addition it solves a common problem I had which is this: I often have pages animate or slide in, while the page that's sliding in has a spinner showing in it. What is sub-optimal in this experience is if the async module loads during that sliding animation, the spinner is replaced with the entire async component and frames are dropped from the sliding animation as React re-renders. It becomes jank. So, say, you have a `500ms` CSS sliding transition, you can set `minDelay` to `500` to perfectly time the re-rendering for immediately after the page slides into place. As for the consequence of not letting your component load as quickly as possible, basically, the previous implementation suffers from the problem it tries to solve anyway: if the loading component starts at `200ms`, and then the async component renders at `230ms`, you still have some flashing jank. In conclusion, it's better just to perfectly time this and have a predictable minimal amount of time the spinner displays.
 
