@@ -1,4 +1,4 @@
 module.exports = {
-  flushModuleIds: require('require-universal-module/server').flushModuleIds,
-  flushChunkNames: require('require-universal-module/server').flushChunkNames
+  flushModuleIds: require('./dist/requireUniversalModule').flushModuleIds,
+  flushChunkNames: require('./dist/requireUniversalModule').flushChunkNames
 }

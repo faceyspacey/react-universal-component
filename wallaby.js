@@ -13,7 +13,8 @@ module.exports = wallaby => {
 
     filesWithNoCoverageCalculated: [
       '__fixtures__/**/*.js',
-      '__test-helpers__/**/*.js'
+      '__test-helpers__/**/*.js',
+      'server.js'
     ],
 
     tests: ['__tests__/**/*.js'],

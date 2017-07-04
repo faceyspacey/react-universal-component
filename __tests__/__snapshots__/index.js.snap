@@ -1,19 +1,78 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Component.preload: static preload method pre-fetches chunk 1`] = `
+exports[`advanced Component.preload: static preload method pre-fetches chunk 1`] = `
 <div>
   Loading...
 </div>
 `;
 
-exports[`Component.preload: static preload method pre-fetches chunk 2`] = `
+exports[`advanced Component.preload: static preload method pre-fetches chunk 2`] = `
 <p>
   MyComponent 
   {}
 </p>
 `;
 
-exports[`Component.preload: static preload method pre-fetches chunk 3`] = `
+exports[`advanced Component.preload: static preload method pre-fetches chunk 3`] = `
+<p>
+  MyComponent 
+  {}
+</p>
+`;
+
+exports[`advanced babel-plugin 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`advanced babel-plugin 2`] = `
+<p>
+  MyComponent 
+  {}
+</p>
+`;
+
+exports[`advanced componentWillReceiveProps: changes component (dynamic require) 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`advanced componentWillReceiveProps: changes component (dynamic require) 2`] = `
+<p>
+  MyComponent 
+  {"page":"MyComponent"}
+</p>
+`;
+
+exports[`advanced componentWillReceiveProps: changes component (dynamic require) 3`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`advanced componentWillReceiveProps: changes component (dynamic require) 4`] = `
+<p>
+  MyComponent 
+  {"page":"MyComponent2"}
+</p>
+`;
+
+exports[`advanced dynamic requires (async) 1`] = `
+<p>
+  MyComponent 
+  {"page":"MyComponent"}
+</p>
+`;
+
+exports[`advanced promise passed directly 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`advanced promise passed directly 2`] = `
 <p>
   MyComponent 
   {}
@@ -133,6 +192,20 @@ exports[`other options minDelay: loads for duration of minDelay even if componen
 `;
 
 exports[`other options minDelay: loads for duration of minDelay even if component ready 3`] = `
+<p>
+  MyComponent 
+  {}
+</p>
+`;
+
+exports[`other options onLoad (async): is called and passed an es6 module 1`] = `
+<p>
+  MyComponent 
+  {}
+</p>
+`;
+
+exports[`other options onLoad (async): is called and passed entire module 1`] = `
 <p>
   MyComponent 
   {}

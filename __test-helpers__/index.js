@@ -1,21 +1,80 @@
+import path from 'path'
 import React from 'react'
-
-// normalize the required path so tests pass in all environments
-export const normalizePath = path => path.split('__fixtures__')[1]
 
 // fake delay so we can test different stages of async loading lifecycle
 export const waitFor = ms => new Promise(resolve => setTimeout(resolve, ms))
 
+// normalize the required path so tests pass in all environments
+export const normalizePath = path => path.split('__fixtures__')[1]
+
+export const createPath = name => path.join(__dirname, '../__fixtures__', name)
+
 export const Loading = props => <p>Loading... {JSON.stringify(props)}</p>
 export const Err = props => <p>Error! {JSON.stringify(props)}</p>
 export const MyComponent = props => <p>MyComponent {JSON.stringify(props)}</p>
+export const MyComponent2 = props => <p>MyComponent {JSON.stringify(props)}</p>
 
-export const createComponent = (delay, Component, error) => async () => {
+export const createComponent = (
+  delay,
+  Component,
+  error = new Error('test error')
+) => async () => {
   await waitFor(delay)
+  if (Component) return Component
+  throw error
+}
 
-  if (Component) {
-    return Component
+export const createDynamicComponent = (
+  delay,
+  components,
+  error = new Error('test error')
+) => async (props, tools) => {
+  await waitFor(delay)
+  const Component = components[props.page]
+  if (Component) return Component
+  throw error
+}
+
+export const createBablePluginComponent = (
+  delay,
+  Component,
+  error = new Error('test error'),
+  name
+) => {
+  const asyncImport = async () => {
+    await waitFor(delay)
+    if (Component) return Component
+    throw error
   }
 
-  throw error
+  return {
+    chunkName: () => name,
+    path: () => name,
+    resolve: () => name,
+    load: () => Promise.all([asyncImport()]),
+    id: name,
+    file: `${name}.js`
+  }
+}
+
+export const createDynamicBablePluginComponent = (
+  delay,
+  components,
+  error = new Error('test error')
+) => {
+  const asyncImport = async page => {
+    await waitFor(delay)
+    const Component = components[page]
+    if (Component) return Component
+    throw error
+  }
+
+  return ({ page }) => ({
+    chunkName: () => page,
+    path: () => createPath(page),
+    resolve: () => createPath(page),
+    load: () => Promise.all([asyncImport(page)]),
+    id: page,
+    file: `${page}.js`
+  })
 }

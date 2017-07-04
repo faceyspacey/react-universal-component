@@ -1,83 +1,56 @@
 // @flow
 import React from 'react'
-import req from 'require-universal-module'
+import req from './requireUniversalModule'
 
-type Id = string
+import type {
+  Config,
+  ConfigFunc,
+  ComponentOptions,
+  RequireAsync,
+  Props
+} from './flowTypes'
 
-type GenericComponent<Props> =
-  | Class<React.Component<{}, Props, mixed>>
-  | React$Element<any>
+import { DefaultLoading, DefaultError, isServer, createElement } from './utils'
 
-type Component<Props> = GenericComponent<Props>
-type LoadingCompponent = GenericComponent<{}>
-type ErrorComponent = GenericComponent<{}>
+let hasBabelPlugin = false
 
-type AsyncComponent<Props> =
-  | Promise<Component<Props>>
-  | (() => Promise<Component<Props>>)
-type Key<Props> = string | null | ((module: ?Object) => Component<Props>)
-type OnLoad = (module: Object) => void
-type OnError = (error: Object) => void
-type PathResolve = Id | (() => Id)
-type Options<Props> = {
-  loading?: LoadingCompponent,
-  error?: ErrorComponent,
-  minDelay?: number,
-
-  // options for requireAsyncModule:
-  resolve?: PathResolve,
-  path?: PathResolve,
-  chunkName?: string,
-  timeout?: number,
-  key?: Key<Props>,
-  onLoad?: OnLoad,
-  onError?: OnError
+export const setHasBabelPlugin = () => {
+  hasBabelPlugin = true
 }
-
-type Props = {
-  error?: ?any,
-  isLoading?: ?boolean
-}
-
-const DefaultLoading = () => <div>Loading...</div>
-const DefaultError = () => <div>Error!</div>
-
-const isServer = typeof window === 'undefined'
-const DEV = process.env.NODE_ENV === 'development'
 
 export default function universal<Props: Props>(
-  component: AsyncComponent<Props>,
-  opts: Options<Props> = {}
+  component: Config | ConfigFunc,
+  opts: ComponentOptions = {}
 ) {
   const {
     loading: Loading = DefaultLoading,
     error: Err = DefaultError,
     minDelay = 0,
+    testBabelPlugin = false,
     ...options
   } = opts
 
-  const { requireSync, requireAsync, addModule, mod } = req(component, options)
+  const isDynamic = hasBabelPlugin || testBabelPlugin
+  options.isDynamic = isDynamic
+  options.modCache = {}
+  options.promCache = {}
 
-  let Component = mod // initial syncronous require attempt done for us :)
+  let Component
 
   return class UniversalComponent extends React.Component<void, Props, *> {
     _mounted: boolean
 
-    static preload(props?: Props) {
-      return requireAsync(props).catch(e => {
-        if (DEV) console.warn('[react-universal-component] preload failed:', e)
-      })
+    static preload(props: Props) {
+      props = props || {}
+      const { requireAsync } = req(component, options, props)
+      return requireAsync(props)
     }
 
     constructor(props: Props) {
       super(props)
 
-      if (!Component) {
-        // try one more syncronous require, in case chunk comes after main.js
-        // HMR won't work if you've setup your app this way. `mod` must be
-        // assigned to `Component` in the closure for HMR to work.
-        Component = requireSync()
-      }
+      const { requireSync } = req(component, options, props)
+      Component = requireSync(props)
 
       this.state = {
         error: null,
@@ -85,16 +58,47 @@ export default function universal<Props: Props>(
       }
     }
 
+    componentWillReceiveProps(nextProps: Props) {
+      if (isDynamic) {
+        const { requireSync, requireAsync, shouldUpdate } = req(
+          component,
+          options,
+          nextProps,
+          this.props
+        )
+
+        if (shouldUpdate()) {
+          Component = requireSync(nextProps)
+          // if !Component, a re-render will happen and show  <Loading />
+
+          if (!Component) {
+            return this.requireAsync(requireAsync, nextProps)
+          }
+
+          this.update({ hasComponent: !!Component })
+        }
+      }
+    }
+
     componentWillMount() {
       this._mounted = true
-      addModule() // record the module for SSR flushing :)
+      const { addModule, requireAsync } = req(component, options, this.props)
+      addModule(this.props) // record the module for SSR flushing :)
 
       if (this.state.hasComponent || isServer) return
+      this.requireAsync(requireAsync, this.props)
+    }
+
+    componentWillUnmount() {
+      this._mounted = false
+    }
+
+    requireAsync(requireAsync: RequireAsync, props: Props) {
       const time = new Date()
 
-      requireAsync(this.props)
-        .then((mod: ?any) => {
-          Component = mod // for HMR updates component must be in closure
+      requireAsync(props)
+        .then((exp: ?any) => {
+          Component = exp // for HMR updates component must be in closure
           const state = { hasComponent: !!Component }
 
           const timeLapsed = new Date() - time
@@ -107,12 +111,9 @@ export default function universal<Props: Props>(
         .catch(error => this.update({ error }))
     }
 
-    componentWillUnmount() {
-      this._mounted = false
-    }
-
     update = (state: { error?: any, hasComponent?: boolean }) => {
       if (!this._mounted) return
+      if (!state.error) state.error = null
       this.setState(state)
     }
 
@@ -139,8 +140,3 @@ export default function universal<Props: Props>(
     }
   }
 }
-
-const createElement = (Component: any, props: Props) =>
-  React.isValidElement(Component)
-    ? React.cloneElement(Component, props)
-    : <Component {...props} />
