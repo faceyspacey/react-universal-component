@@ -99,7 +99,8 @@ exports[`async lifecycle error 2`] = `
 
 exports[`async lifecycle error 3`] = `
 <div>
-  Error!
+  Error: 
+  test error
 </div>
 `;
 
@@ -137,7 +138,8 @@ exports[`async lifecycle timeout error 1`] = `
 
 exports[`async lifecycle timeout error 2`] = `
 <div>
-  Error!
+  Error: 
+  timeout exceeded
 </div>
 `;
 

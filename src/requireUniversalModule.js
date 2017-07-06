@@ -81,11 +81,15 @@ export default function requireUniversalModule<Props: Props>(
     if (cachedPromise) return cachedPromise
 
     const prom = new Promise((res, rej) => {
-      const timer =
-        timeout &&
-        setTimeout(() => {
-          rej(new Error('timeout exceeded'))
-        }, timeout)
+      const reject = error => {
+        error = error || new Error('timeout exceeded')
+        clearTimeout(timer)
+        if (onError) onError(error)
+        rej(error)
+      }
+
+      // const timer = timeout && setTimeout(reject, timeout)
+      const timer = timeout && setTimeout(reject, timeout)
 
       const resolve = mod => {
         clearTimeout(timer)
@@ -93,12 +97,7 @@ export default function requireUniversalModule<Props: Props>(
         const exp = resolveExport(mod, key, onLoad, chunkName, props, modCache)
         if (exp) return res(exp)
 
-        rej(new Error('export not found'))
-      }
-
-      const reject = error => {
-        clearTimeout(timer)
-        rej(error)
+        reject(new Error('export not found'))
       }
 
       const request = load(props, { resolve, reject })
@@ -106,18 +105,7 @@ export default function requireUniversalModule<Props: Props>(
       // if load doesn't return a promise, it must call resolveImport
       // itself. Most common is the promise implementation below.
       if (!request || typeof request.then !== 'function') return
-
-      request
-        .then(mod => {
-          // babel-plugin-universal-import transforms promise to: Promise.all([import(), importcss()])
-          if (Array.isArray(mod)) mod = mod[0]
-          return resolve(mod)
-        })
-        .catch(error => {
-          clearTimeout(timer)
-          if (onError) onError(error)
-          reject(error)
-        })
+      request.then(resolve).catch(reject)
     })
 
     cacheProm(prom, chunkName, props, promCache)

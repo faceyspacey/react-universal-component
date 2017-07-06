@@ -9,7 +9,8 @@ export const babelInterop = (mod: ?Mod) =>
   mod && typeof mod === 'object' && mod.__esModule ? mod.default : mod
 
 export const DefaultLoading = () => <div>Loading...</div>
-export const DefaultError = () => <div>Error!</div>
+export const DefaultError = ({ error }: { error: Object }) =>
+  <div>Error: {error && error.message}</div>
 
 export const tryRequire = (id: Id): ?any => {
   try {

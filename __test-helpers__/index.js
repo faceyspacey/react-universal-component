@@ -51,7 +51,7 @@ export const createBablePluginComponent = (
     chunkName: () => name,
     path: () => name,
     resolve: () => name,
-    load: () => Promise.all([asyncImport()]),
+    load: () => Promise.all([asyncImport(), 'css']).then(prom => prom[0]),
     id: name,
     file: `${name}.js`
   }
@@ -73,7 +73,7 @@ export const createDynamicBablePluginComponent = (
     chunkName: () => page,
     path: () => createPath(page),
     resolve: () => createPath(page),
-    load: () => Promise.all([asyncImport(page)]),
+    load: () => Promise.all([asyncImport(page), 'css']).then(prom => prom[0]),
     id: page,
     file: `${page}.js`
   })

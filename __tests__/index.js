@@ -69,6 +69,7 @@ describe('async lifecycle', () => {
     expect(component.toJSON()).toMatchSnapshot() // initial
 
     await waitFor(20)
+
     expect(component.toJSON()).toMatchSnapshot() // error
   })
 

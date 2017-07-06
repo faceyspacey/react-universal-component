@@ -12,10 +12,7 @@ export type Config = {
   file: string
 }
 
-export type Load = (
-  Object,
-  AsyncFuncTools
-) => Promise<[ImportModule]> | Promise<ImportModule>
+export type Load = (Object, AsyncFuncTools) => Promise<ImportModule>
 
 // function that returns config (babel-plugin-universal-import)
 // $FlowIssue
