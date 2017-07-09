@@ -284,8 +284,8 @@ within Webpack. For example:
 
 ```js
 const externals = fs
-  .readdirSync(modeModules)
-  .filter(x => !/\.bin|require-universal-module|webpack-flush-chunks/.test(x))
+  .readdirSync(nodeModules)
+  .filter(x => !/\.bin|react-universal-component|require-universal-module|webpack-flush-chunks/.test(x))
   .reduce((externals, mod) => {
     externals[mod] = `commonjs ${mod}`
     return externals
