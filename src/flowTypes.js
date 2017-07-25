@@ -76,7 +76,8 @@ export type Tools = {
   requireAsync: RequireAsync,
   requireSync: RequireSync,
   addModule: AddModule,
-  shouldUpdate: () => boolean
+  shouldUpdate: (nextProps: Object, props: Object) => boolean,
+  asyncOnly: boolean
 }
 
 export type Ids = Array<string>

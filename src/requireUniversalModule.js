@@ -46,6 +46,7 @@ export default function requireUniversalModule<Props: Props>(
 
   const config = getConfig(isDynamic, universalConfig, options, props)
   const { chunkName, path, resolve, load } = config
+  const asyncOnly = !path && !resolve
 
   const requireSync = (props: Object): ?any => {
     let exp = loadFromCache(chunkName, props, modCache)
@@ -134,7 +135,18 @@ export default function requireUniversalModule<Props: Props>(
     }
   }
 
-  const shouldUpdate = (): boolean => {
+  const shouldUpdate = (next, prev): boolean => {
+    if (asyncOnly) {
+      const cacheKey = callForString(chunkName, next)
+
+      const config = getConfig(isDynamic, universalConfig, options, prev)
+      const prevCacheKey = callForString(config.chunkName, prev)
+
+      return cacheKey !== prevCacheKey
+    }
+
+    // below is what the babel-plugin triggers
+
     if (!prevProps) return false
 
     const cacheKey = callForString(chunkName, props)
@@ -149,7 +161,8 @@ export default function requireUniversalModule<Props: Props>(
     requireSync,
     requireAsync,
     addModule,
-    shouldUpdate
+    shouldUpdate,
+    asyncOnly
   }
 }
 
