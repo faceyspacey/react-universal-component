@@ -39,7 +39,7 @@
 
 For "power users" the SPA is dead. If you're not universally rendering on the server you're doing it "wrong." You're losing money for you, your clients, your employers. All hail the Google god.
 
-This is the final universal component for React you'll ever need.
+*This is the final universal component for React you'll ever need, and it looks like this:*
 
 ```js
 import universal from 'react-universal-component'
@@ -109,10 +109,10 @@ universal(asyncComponent, options)
 
 **asyncComponent:**
 - ```props => import(`./${page}`)```
-- `import('./Foo')` // doesn't need to be wrapped in a function when using the babel plugin!
+- `import('./Foo')` *// doesn't need to be wrapped in a function when using the babel plugin!*
 - `(props, cb) => require.ensure([], require => cb(null, require('./Foo')))`
 
-The first argument can be a function that returns a promise, a promise itself, or a function that takes a node-style callback.
+The first argument can be a function that returns a promise, a promise itself, or a function that takes a node-style callback. The most powerful and popular is a function that takes props as an argument.
 
 **Options (all are optional):**
 
