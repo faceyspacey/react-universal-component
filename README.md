@@ -1,5 +1,7 @@
 [![Edit Redux-First Router Demo](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/github/faceyspacey/redux-first-router-codesandbox/tree/master/?module=r1oVP5YEUZ)
 
+**[GIT CLONE LOCAL DEMO](https://github.com/faceyspacey/universal-demo)**
+
 # React Universal Component
 
 <p align="center">
