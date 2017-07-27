@@ -2,7 +2,7 @@
 
 🍾🍾🍾 **[GIT CLONE LOCAL DEMO](https://github.com/faceyspacey/universal-demo)** 🚀🚀🚀
 
-# React Universal Component
+# React Universal Component [![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg?style=flat-square)](https://gitter.im/Reactlandia/Lobby)
 
 <p align="center">
   <a href="https://www.npmjs.com/package/react-universal-component">
@@ -31,10 +31,6 @@
 
   <a href="https://www.npmjs.com/package/react-universal-component">
     <img src="https://img.shields.io/npm/l/react-universal-component.svg" alt="License" />
-  </a>
-
-  <a href="https://gitter.im/faceyspacey/Lobby/~chat">
-    <img src="https://img.shields.io/gitter/room/nwjs/nw.js.svg" alt="Gitter Chat" />
   </a>
 </p>
 
