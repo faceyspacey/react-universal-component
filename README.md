@@ -1,8 +1,14 @@
-[![Edit Redux-First Router Demo](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/github/faceyspacey/redux-first-router-codesandbox/tree/master/?module=r1oVP5YEUZ)
+<a href="https://gitter.im/Reactlandia/Lobby" target="_blank">
+  <img alt="Edit Redux-First Router Demo" src="http://cdn.reactlandia.com/chat-badge-reactlandia.png">
+</a>
+
+<a href="https://codesandbox.io/s/github/faceyspacey/redux-first-router-codesandbox" target="_blank">
+  <img alt="Edit Redux-First Router Demo" src="https://codesandbox.io/static/img/play-codesandbox.svg">
+</a>
 
 🍾🍾🍾 **[GIT CLONE LOCAL DEMO](https://github.com/faceyspacey/universal-demo)** 🚀🚀🚀
 
-# React Universal Component [![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg?style=flat-square)](https://gitter.im/Reactlandia/Lobby)
+# React Universal Component
 
 <p align="center">
   <a href="https://www.npmjs.com/package/react-universal-component">
