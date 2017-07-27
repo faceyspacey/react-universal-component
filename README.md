@@ -2,7 +2,7 @@
   <img alt="Edit Redux-First Router Demo" src="http://cdn.reactlandia.com/chat-badge-reactlandia.png">
 </a>
 
-<a href="https://codesandbox.io/s/github/faceyspacey/redux-first-router-codesandbox" target="_blank">
+<a href="https://codesandbox.io/s/github/faceyspacey/redux-first-router-codesandbox/tree/master/?module=r1oVP5YEUZ" target="_blank">
   <img alt="Edit Redux-First Router Demo" src="https://codesandbox.io/static/img/play-codesandbox.svg">
 </a>
 
@@ -40,6 +40,10 @@
   </a>
 </p>
 
+
+<p align="center">
+  <img src="./universal-graphic.png" />
+</p>
 
 <p align="center">
 🍾🍾🍾 <a href="https://github.com/faceyspacey/universal-demo)">GIT CLONE LOCAL DEMO</a> 🚀🚀🚀
@@ -238,6 +242,16 @@ export default graphql(gql`
 ```
 > If it's not clear, the ***same*** `loading` component will show while both async aspects load, without flinching/re-rendering. And perhaps more importantly **they will be run in parallel**.
 
+
+## Universal Demo
+🍾🍾🍾 **[faceyspacey/universal-demo](https://github.com/faceyspacey/universal-demo)** 🚀🚀🚀
+
+```bash
+git clone https://github.com/faceyspacey/universal-demo.git
+cd universal-demo
+yarn
+yarn start
+```
 
 ## Contributing
 
