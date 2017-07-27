@@ -91,11 +91,14 @@ That's probably because you were trapped in SPA land. If you didn't know how muc
 
 > For Typescript or environments without Babel, just copy what [babel-plugin-universal-import](https://github.com/faceyspacey/babel-plugin-universal-import) does.
 
-## Motivation
 
-To learn why this has been so complicated, read our launch article (June 8th):
+**Reactlandia Articles:**
 
-**[Code Cracked for Code-Splitting + SSR in Reactlandia](https://medium.com/@faceyspacey/code-cracked-for-code-splitting-ssr-in-reactlandia-react-loadable-webpack-flush-chunks-and-1a6b0112a8b8)**
+- [code-cracked-for-ssr-plus-splitting-in-reactlandia](https://medium.com/@faceyspacey/code-cracked-for-code-splitting-ssr-in-reactlandia-react-loadable-webpack-flush-chunks-and-1a6b0112a8b8)
+
+- [react-universal-component-2-and-babel-plugin-universal-import](https://medium.com/@faceyspacey/code-cracked-for-code-splitting-ssr-in-reactlandia-react-loadable-webpack-flush-chunks-and-1a6b0112a8b8) 🚀
+
+- [how-to-use-webpack-magic-comments-with-react-universal-component](https://medium.com/@faceyspacey/how-to-use-webpacks-new-magic-comment-feature-with-react-universal-component-ssr-a38fd3e296a)
 
 
 ## Other Packages You Will Need/Want
