@@ -46,7 +46,7 @@
 </p>
 
 <p align="center">
-🍾🍾🍾 <a href="https://github.com/faceyspacey/universal-demo)">GIT CLONE LOCAL DEMO</a> 🚀🚀🚀
+🍾🍾🍾 <a href="https://github.com/faceyspacey/universal-demo">GIT CLONE LOCAL DEMO</a> 🚀🚀🚀
 </p>
 
 For "power users" the SPA is dead. If you're not universally rendering on the server you're doing it "wrong." You're losing money for you, your clients, your employers. All hail the Google god.
