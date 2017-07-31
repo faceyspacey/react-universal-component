@@ -8,7 +8,7 @@
 
 
 
-# React Universal Component
+# React Universal Component 2.0
 
 <p align="center">
   <a href="https://www.npmjs.com/package/react-universal-component">
@@ -42,11 +42,11 @@
 
 
 <p align="center">
-  <img src="./universal-graphic.png" />
+  <img src="https://s3-us-west-1.amazonaws.com/cdn.reactlandia.com/universal-component-banner.png" />
 </p>
 
 <p align="center">
-🍾🍾🍾 <a href="https://github.com/faceyspacey/universal-demo">GIT CLONE LOCAL DEMO</a> 🚀🚀🚀
+🍾🍾🍾 <a href="https://github.com/faceyspacey/universal-demo">GIT CLONE 2.0 LOCAL DEMO</a> 🚀🚀🚀
 </p>
 
 For "power users" the SPA is dead. If you're not universally rendering on the server you're doing it "wrong." You're losing money for you, your clients, your employers. All hail the Google god.
