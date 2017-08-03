@@ -67,7 +67,7 @@ export default function requireUniversalModule<Props: Props>(
       }
 
       if (mod) {
-        exp = resolveExport(mod, key, onLoad, chunkName, props, modCache)
+        exp = resolveExport(mod, key, onLoad, chunkName, props, modCache, true)
       }
     }
 
@@ -85,7 +85,11 @@ export default function requireUniversalModule<Props: Props>(
       const reject = error => {
         error = error || new Error('timeout exceeded')
         clearTimeout(timer)
-        if (onError) onError(error)
+        if (onError) {
+          const isServer = typeof window === 'undefined'
+          const info = { isServer }
+          onError(error, info)
+        }
         rej(error)
       }
 

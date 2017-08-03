@@ -238,7 +238,7 @@ describe('requireAsync: requires module asynchronously on the client, returning 
       expect(error.message).toEqual('ah')
     }
 
-    expect(onError).toBeCalledWith(error)
+    expect(onError).toBeCalledWith(error, { isServer: false })
   })
 })
 
@@ -364,22 +364,32 @@ describe('other options', () => {
 
     await requireAsync()
 
-    expect(onLoad).toBeCalledWith(mod)
-    expect(onLoad).not.toBeCalledWith('foo')
+    expect(onLoad).toBeCalledWith(mod, { isServer: false, isSync: false })
+    expect(onLoad).not.toBeCalledWith('foo', { isServer: false, isSync: false })
   })
 
   it('onLoad (sync): is called and passed entire module', async () => {
     const onLoad = jest.fn()
     const mod = { __esModule: true, default: 'foo' }
-    const asyncImport = Promise.resolve(mod)
-    const { requireAsync } = requireModule(() => asyncImport, {
+    const asyncImport = () => {
+      throw new Error('ah')
+    }
+
+    global.__webpack_modules__ = { id: mod }
+    global.__webpack_require__ = id => __webpack_modules__[id]
+
+    const { requireSync } = requireModule(asyncImport, {
       onLoad,
+      resolve: () => 'id',
       key: 'default'
     })
 
-    await requireAsync()
+    requireSync()
 
-    expect(onLoad).toBeCalledWith(mod)
-    expect(onLoad).not.toBeCalledWith('foo')
+    expect(onLoad).toBeCalledWith(mod, { isServer: false, isSync: true })
+    expect(onLoad).not.toBeCalledWith('foo', { isServer: false, isSync: true })
+
+    delete global.__webpack_require__
+    delete global.__webpack_modules__
   })
 })

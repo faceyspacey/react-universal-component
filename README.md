@@ -1,5 +1,5 @@
 <a href="https://gitter.im/Reactlandia/Lobby" target="_blank">
-  <img alt="Edit Redux-First Router Demo" src="https://s3-us-west-1.amazonaws.com/cdn.reactlandia.com/reactlandia-chat.png">
+  <img alt="Reactlandia Chat" src="https://s3-us-west-1.amazonaws.com/cdn.reactlandia.com/reactlandia-chat.png">
 </a>
 
 <a href="https://codesandbox.io/s/github/faceyspacey/redux-first-router-codesandbox/tree/master/?module=r1oVP5YEUZ" target="_blank">
@@ -135,9 +135,11 @@ The first argument can be a function that returns a promise, a promise itself, o
 - `error`: ErrorComponent, -- *default: a simple one is provided for you*
 - `key`: `'foo'` || `module => module.foo` -- *default: `default` export in ES6 and `module.exports` in ES5* 
 - `timeout`: `15000` -- *default*
-- `onLoad`: `module => doSomething(module)
-- `onError`: `error => handleError(error)
+- `onError`: `(error, { isServer }) => handleError(error, isServer)
+- `onLoad`: `(module, { isSync, isServer }) => doSomething(module, isSync, isServer)`
 - `minDelay`: `0` -- *default*
+- `alwaysDelay`: `false` -- *default*
+- `loadingTransition`: `true` -- *default*
 
 
 **In Depth:**
@@ -151,11 +153,16 @@ The first argument can be a function that returns a promise, a promise itself, o
 
 - `timeout` allows you to specify a maximum amount of time before the `error` component is displayed. The default is 15 seconds.
 
-- `onLoad` is a callback function that receives the *entire* module. It allows you to export and put to use things other than your `default` component export, like reducers, sagas, etc. E.g: `onLoad: module => store.replaceReducer({ ...otherReducers, foo: module.fooReducer })`.
 
 - `onError` is a callback called if async imports fail. It does not apply to sync requires.
 
-- `minDelay` is essentially the minimum amount of time the loading component will always show for. It's good for enforcing silky smooth animations, such as during a 500ms sliding transition. It insures the re-render won't happen until the animation is complete. It's often a good idea to set this to something like 300ms even if you don't have a transition, just so the loading spinner shows for an appropriate amount of time without jank.
+- `onLoad` is a callback function that receives the *entire* module. It allows you to export and put to use things other than your `default` component export, like reducers, sagas, etc. E.g: `onLoad: module => store.replaceReducer({ ...otherReducers, foo: module.fooReducer })`. It's fired directly before the component is rendered so you can setup any reducers/etc it depends on. Unlike `onAfterChange`, it's only fired the first time the module is received. *Also note*: it will fire on the server, so do `if (!isServer)` if you have to.
+
+- `minDelay` is essentially the minimum amount of time the `loading` component will always show for. It's good for enforcing silky smooth animations, such as during a 500ms sliding transition. It insures the re-render won't happen until the animation is complete. It's often a good idea to set this to something like 300ms even if you don't have a transition, just so the loading spinner shows for an appropriate amount of time without jank.
+
+- `alwaysDelay` is a boolean you can set to true (*default: false*) to guarantee the `minDelay` is always used (i.e. even when components cached from previous imports and therefore synchronously and instantly required). This can be useful for guaranteeing animations operate as you want without having to wire up other components to perform the task. *Note: this only applies to the client when your `UniversalComponent` uses dynamic expressions to switch between multiple components.*
+
+- `loadingTransition` when set to `false` allows you to keep showing the current component when the `loading` component would otherwise show during transitions from one component to the next.
 
 
 ## Flushing for SSR
@@ -210,9 +217,38 @@ export default class MyComponent extends React.Component {
 }
 ```
 
+## Static Hoisting
+
+If your imported component has static methods like this:
+
+```js
+export default class MyComponent extends React.Component {
+  static doSomething() {}
+  render() {}
+}
+```
+
+Then this will work:
+
+```js
+const MyUniversalComponent = universal(import('./MyComponent'))
+
+// render it
+<MyUniversalComponent />
+
+// call this only after you're sure it has loaded
+MyUniversalComponent.doSomething()
+```
+> NOTE: for imports using dynamic expressions, conflicting methods will be overwritten by the current component
 
 ## Props API
 
+- `isLoading: boolean`
+- `error: new Error`
+- `onBefore`: `({ isMount, isSync, isServer }) => doSomething(isMount, isSync, isServer)`
+- `onAfter`: `({ isMount, isSync, isServer }, Component) => doSomething(Component, isMount, etc)`
+
+### `isLoading` + `error`:
 You can pass `isLoading` and `error` props to the resulting component returned from the `universal` HoC. This has the convenient benefit of allowing you to continue to show the ***same*** `loading` component (or trigger the ***same*** `error` component) that is shown while your async component loads *AND* while any data-fetching may be occuring in a parent HoC. That means less jank from unnecessary re-renders, and less work (DRY).
 
 Here's an example using Apollo:
@@ -241,6 +277,38 @@ export default graphql(gql`
 })(User)
 ```
 > If it's not clear, the ***same*** `loading` component will show while both async aspects load, without flinching/re-rendering. And perhaps more importantly **they will be run in parallel**.
+
+### `onBefore` + `onAfter`:
+
+`onBefore/After` are callbacks called before and after the wrapped component changes. It's also called on `componentWillMount` on both the client and server. If you chose to use it on the server, make sure the client renders the same thing on first load or you will have checksum mismatches.
+
+It's primary use case is for triggering *loading* state **outside** of the component *on the client during child component transitions*. You can use its `info` argument and keys like `info.isSync` to determine what you want to do. Here's an example:
+
+```js
+const UniversalComponent = univesal(props => import(`./props.page`))
+
+const MyComponent = ({ dispatch, isLoading }) =>
+  <div>
+    {isLoading && <div>loading...</div>}
+  
+    <UniversalComponent
+      page={props.page}
+      onBefore={({ isSync }) => !isSync && dispatch({ type: 'LOADING', true })}
+      onAfter={({ isSync }) => !isSync && dispatch({ type: 'LOADING', false })}
+    />
+  </div>
+```
+
+Each callback is passed an `info` argument containing these keys: 
+
+- `isMount` *(whether the component just mounted)*
+- `isSync` *(whether the imported component is already available from previous usage and  required synchronsouly)*
+- `isServer` *(very rarely will you want to do stuff on the server; note: server will always be sync)*
+
+`onAfter` is also passed a second argument containing the imported `Component`, which you can use to do things like call its static methods.
+
+> NOTE: `onBefore` and `onAfter` will fire synchronously a millisecond a part after the first time `Component` loads (and on the server). Your options are to only trigger loading state when `!info.isSync` as in the above example, or you can use the `info` argument with `minDelay` + `alwaysDelay` to insure the 2 callbacks always fire, e.g., *300ms* a part. The latter can be helpful to produce consistent glitch-free animations. A consistent `300ms` or even `500ms` wait doesn't hurt user-experience--what does is unpredictability, glitchy animations and large bundles 😀
+
 
 
 ## Universal Demo

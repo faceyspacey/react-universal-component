@@ -1,5 +1,6 @@
 // @flow
 import React from 'react'
+import hoist from 'hoist-non-react-statics'
 import req from './requireUniversalModule'
 
 import type {
@@ -7,7 +8,8 @@ import type {
   ConfigFunc,
   ComponentOptions,
   RequireAsync,
-  Props
+  Props,
+  State
 } from './flowTypes'
 
 import { DefaultLoading, DefaultError, isServer, createElement } from './utils'
@@ -29,7 +31,9 @@ export default function universal<Props: Props>(
     loading: Loading = DefaultLoading,
     error: Err = DefaultError,
     minDelay = 0,
+    alwaysDelay = false,
     testBabelPlugin = false,
+    loadingTransition = true,
     ...options
   } = opts
 
@@ -41,6 +45,9 @@ export default function universal<Props: Props>(
   return class UniversalComponent extends React.Component<void, Props, *> {
     _mounted: boolean
     _asyncOnly: boolean
+    _component: ?Object
+    props: Props
+    state: State
 
     static preload(props: Props) {
       props = props || {}
@@ -50,23 +57,30 @@ export default function universal<Props: Props>(
 
     constructor(props: Props) {
       super(props)
-
-      const { requireSync, asyncOnly } = req(component, options, props)
-      this._asyncOnly = asyncOnly
-
-      this.state = {
-        error: null,
-        Component: requireSync(props)
-      }
+      this.state = { error: null }
     }
 
     componentWillMount() {
       this._mounted = true
-      const { addModule, requireAsync } = req(component, options, this.props)
+
+      const { addModule, requireSync, requireAsync, asyncOnly } = req(
+        component,
+        options,
+        this.props
+      )
+      const Component = requireSync(this.props)
+
+      this._asyncOnly = asyncOnly
       addModule(this.props) // record the module for SSR flushing :)
 
-      if (this.state.Component || isServer) return
-      this.requireAsync(requireAsync, this.props)
+      if (Component || isServer) {
+        this.handleBefore(true, true, isServer)
+        this.update({ Component }, true, true, isServer)
+        return
+      }
+
+      this.handleBefore(true, false)
+      this.requireAsync(requireAsync, this.props, true)
     }
 
     componentWillUnmount() {
@@ -84,21 +98,28 @@ export default function universal<Props: Props>(
 
         if (shouldUpdate(nextProps, this.props) || isHMR()) {
           const Component = requireSync(nextProps)
+          this.handleBefore(false, !!Component)
 
           if (!Component) {
             return this.requireAsync(requireAsync, nextProps)
           }
 
-          this.update({ Component })
+          const state = { Component }
+
+          if (alwaysDelay) {
+            if (loadingTransition) this.update({ Component: null }) // display `loading` during componentWillReceiveProps
+            setTimeout(() => this.update(state, false, true), minDelay)
+            return
+          }
+
+          this.update(state, false, true)
         }
       }
     }
 
-    requireAsync(requireAsync: RequireAsync, props: Props) {
-      // insure `loading` displays even when the component
-      // changes during componentWillReceiveProps
-      if (this.state.Component) {
-        this.update({ Component: null })
+    requireAsync(requireAsync: RequireAsync, props: Props, isMount?: boolean) {
+      if (this.state.Component && loadingTransition) {
+        this.update({ Component: null }) // display `loading` during componentWillReceiveProps
       }
 
       const time = new Date()
@@ -110,16 +131,54 @@ export default function universal<Props: Props>(
           const timeLapsed = new Date() - time
           if (timeLapsed < minDelay) {
             const extraDelay = minDelay - timeLapsed
-            return setTimeout(() => this.update(state), extraDelay)
+            return setTimeout(() => this.update(state, isMount), extraDelay)
           }
-          this.update(state)
+
+          this.update(state, isMount)
         })
         .catch(error => this.update({ error }))
     }
 
-    update = (state: { error?: any, Component?: ?any }) => {
+    update = (
+      state: State,
+      isMount?: boolean = false,
+      isSync?: boolean = false,
+      isServer?: boolean = false
+    ) => {
       if (!this._mounted) return
       if (!state.error) state.error = null
+      this.handleAfter(state, isMount, isSync, isServer)
+    }
+
+    handleBefore(
+      isMount: boolean,
+      isSync: boolean,
+      isServer?: boolean = false
+    ) {
+      if (this.props.onBeforeChange) {
+        const onBeforeChange = this.props.onBeforeChange
+        const info = { isMount, isSync, isServer }
+        onBeforeChange(info)
+      }
+    }
+
+    handleAfter(
+      state: State,
+      isMount: boolean,
+      isSync: boolean,
+      isServer: boolean
+    ) {
+      if (state.Component && !state.error) {
+        hoist(UniversalComponent, state.Component, { preload: true })
+      }
+
+      if (state.Component && !state.error && this.props.onAfterChange) {
+        const onAfterChange = this.props.onAfterChange
+        const info = { isMount, isSync, isServer }
+        this.setState(state, () => onAfterChange(info, state.Component))
+        return
+      }
+
       this.setState(state)
     }
 

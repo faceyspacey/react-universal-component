@@ -276,7 +276,7 @@ describe('other options', () => {
     const component = renderer.create(<Component />)
 
     await waitFor(50)
-    expect(onLoad).toBeCalledWith(mod)
+    expect(onLoad).toBeCalledWith(mod, { isServer: false, isSync: false })
 
     expect(component.toJSON()).toMatchSnapshot() // success
   })
@@ -293,7 +293,7 @@ describe('other options', () => {
     const component = renderer.create(<Component />)
 
     await waitFor(50)
-    expect(onLoad).toBeCalledWith(mod)
+    expect(onLoad).toBeCalledWith(mod, { isServer: false, isSync: false })
 
     expect(component.toJSON()).toMatchSnapshot() // success
   })
@@ -309,7 +309,10 @@ describe('other options', () => {
 
     renderer.create(<Component />)
 
-    expect(onLoad).toBeCalledWith(require('../__fixtures__/component'))
+    expect(onLoad).toBeCalledWith(require('../__fixtures__/component'), {
+      isServer: false,
+      isSync: true
+    })
   })
 
   it('minDelay: loads for duration of minDelay even if component ready', async () => {

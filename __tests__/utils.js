@@ -61,7 +61,7 @@ test('resolveExport: finds export and calls onLoad', () => {
   const mod = { foo: 'bar' }
   const exp = resolveExport(mod, 'foo', onLoad)
   expect(exp).toEqual('bar')
-  expect(onLoad).toBeCalledWith(mod)
+  expect(onLoad).toBeCalledWith(mod, { isServer: false, isSync: false })
   // todo: test caching
 })
 

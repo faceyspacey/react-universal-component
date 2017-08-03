@@ -44,6 +44,8 @@ export type ComponentOptions = {
   loading?: LoadingCompponent,
   error?: ErrorComponent,
   minDelay?: number,
+  alwaysDelay?: boolean,
+  loadingTransition?: boolean,
   testBabelPlugin?: boolean,
 
   // options for requireAsyncModule:
@@ -65,8 +67,11 @@ export type ResolveImport = (module: ?any) => void
 export type RejectImport = (error: Object) => void
 export type Id = string
 export type Key = string | null | ((module: ?(Object | Function)) => any)
-export type OnLoad = (module: ?(Object | Function)) => void
-export type OnError = (error: Object) => void
+export type OnLoad = (
+  module: ?(Object | Function),
+  info: { isServer: boolean }
+) => void
+export type OnError = (error: Object, info: { isServer: boolean }) => void
 
 export type RequireAsync = (props: Object) => Promise<?any>
 export type RequireSync = (props: Object) => ?any
@@ -83,10 +88,17 @@ export type Tools = {
 export type Ids = Array<string>
 
 // RUC
+export type State = { error?: any, Component?: ?any }
+
+type Info = { isMount: boolean, isSync: boolean, isServer: boolean }
+type OnBeforeChange = Info => void
+type OnAfterChange = (Info, any) => void
 
 export type Props = {
   error?: ?any,
-  isLoading?: ?boolean
+  isLoading?: ?boolean,
+  onBeforeChange?: OnBeforeChange,
+  onAfterChange?: OnAfterChange
 }
 
 export type GenericComponent<Props> =

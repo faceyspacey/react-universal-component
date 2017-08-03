@@ -35,10 +35,15 @@ export const resolveExport = (
   onLoad?: OnLoad,
   chunkName?: StrFun,
   props: Object,
-  modCache: Object
+  modCache: Object,
+  isSync?: boolean = false
 ) => {
   const exp = findExport(mod, key)
-  if (onLoad && mod) onLoad(mod)
+  if (onLoad && mod) {
+    const isServer = typeof window === 'undefined'
+    const info = { isServer, isSync }
+    onLoad(mod, info)
+  }
   if (chunkName && exp) cacheExport(exp, chunkName, props, modCache)
   return exp
 }
