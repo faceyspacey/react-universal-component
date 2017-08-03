@@ -97,8 +97,8 @@ type OnAfter = (Info, any) => void
 export type Props = {
   error?: ?any,
   isLoading?: ?boolean,
-  OnBefore?: OnBefore,
-  OnAfter?: OnAfter
+  onBefore?: OnBefore,
+  onAfter?: OnAfter
 }
 
 export type GenericComponent<Props> =

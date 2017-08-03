@@ -170,15 +170,14 @@ export default function universal<Props: Props>(
     ) {
       const { Component, error } = state
 
-      if (Component && state.error) {
+      if (Component && !error) {
         hoist(UniversalComponent, Component, { preload: true })
-      }
 
-      if (Component && !error && typeof this.props.onAfter === 'function') {
-        const onAfter = this.props.onAfter
-        const info = { isMount, isSync, isServer }
-        this.setState(state, () => onAfter(info, Component))
-        return
+        if (this.props.onAfter === 'function') {
+          const { onAfter } = this.props
+          const info = { isMount, isSync, isServer }
+          onAfter(info, Component)
+        }
       }
 
       this.setState(state)
