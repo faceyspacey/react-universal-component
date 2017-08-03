@@ -74,7 +74,7 @@ export default function universal<Props: Props>(
       addModule(this.props) // record the module for SSR flushing :)
 
       if (Component || isServer) {
-        this.handleBefore(true, true, isServer)
+        if (!isServer) this.handleBefore(true, true)
         this.update({ Component }, true, true, isServer)
         return
       }
@@ -96,7 +96,7 @@ export default function universal<Props: Props>(
           this.props
         )
 
-        if (shouldUpdate(nextProps, this.props) || isHMR()) {
+        if (shouldUpdate(nextProps, this.props)) {
           const Component = requireSync(nextProps)
           this.handleBefore(false, !!Component)
 
@@ -113,6 +113,9 @@ export default function universal<Props: Props>(
           }
 
           this.update(state, false, true)
+        }
+        else if (isHMR()) {
+          requireSync(nextProps) // just needs to be required again to complete HMR
         }
       }
     }
@@ -150,14 +153,10 @@ export default function universal<Props: Props>(
       this.handleAfter(state, isMount, isSync, isServer)
     }
 
-    handleBefore(
-      isMount: boolean,
-      isSync: boolean,
-      isServer?: boolean = false
-    ) {
+    handleBefore(isMount: boolean, isSync: boolean) {
       if (typeof this.props.onBefore === 'function') {
         const onBefore = this.props.onBefore
-        const info = { isMount, isSync, isServer }
+        const info = { isMount, isSync }
         onBefore(info)
       }
     }

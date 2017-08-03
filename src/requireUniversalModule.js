@@ -119,6 +119,12 @@ export default function requireUniversalModule<Props: Props>(
 
   const addModule = (props: Object): void => {
     if (isServer) {
+      if (chunkName) {
+        const name = callForString(chunkName, props)
+        if (name) CHUNK_NAMES.add(name)
+        if (!IS_TEST) return // makes tests way smaller to run both kinds
+      }
+
       if (isWebpack()) {
         const weakId = callForString(resolve, props)
         if (weakId) MODULE_IDS.add(weakId)
@@ -126,15 +132,6 @@ export default function requireUniversalModule<Props: Props>(
       else if (!isWebpack()) {
         const modulePath = callForString(path, props)
         if (modulePath) MODULE_IDS.add(modulePath)
-      }
-
-      // just fill both sets so `flushModuleIds` continues to work,
-      // even if you decided to start providing chunk names. It's
-      // a small array of 3-20 chunk names on average anyway. Users
-      // can flush/clear both sets if they feel they need to.
-      if (chunkName) {
-        const name = callForString(chunkName, props)
-        if (name) CHUNK_NAMES.add(name)
       }
     }
   }

@@ -516,7 +516,7 @@ describe('SSR flushing: flushModuleIds() + flushChunkNames()', () => {
     expect(chunkNames).toEqual(['component', 'component3'])
   })
 
-  it('webpack: dynamic require (babel-plugin', async () => {
+  it('webpack: dynamic require (babel-plugin)', async () => {
     global.__webpack_require__ = path => __webpack_modules__[path]
 
     // modules stored by paths instead of IDs (replicates babel implementation)
