@@ -90,10 +90,9 @@ export type Ids = Array<string>
 // RUC
 export type State = { error?: any, Component?: ?any }
 
-type OnBeforeInfo = { isMount: boolean, isSync: boolean }
-type OnAfterInfo = { isMount: boolean, isSync: boolean, isServer: boolean }
-type OnBefore = OnBeforeInfo => void
-type OnAfter = (OnAfterInfo, any) => void
+type Info = { isMount: boolean, isSync: boolean, isServer: boolean }
+type OnBefore = Info => void
+type OnAfter = (Info, any) => void
 
 export type Props = {
   error?: ?any,

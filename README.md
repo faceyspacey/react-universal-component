@@ -245,7 +245,7 @@ MyUniversalComponent.doSomething()
 
 - `isLoading: boolean`
 - `error: new Error`
-- `onBefore`: `({ isMount, isSync }) => doSomething(isMount, isSync)`
+- `onBefore`: `({ isMount, isSync, isServer }) => doSomething(isMount, isSync, isServer)`
 - `onAfter`: `({ isMount, isSync, isServer }, Component) => doSomething(Component, isMount, etc)`
 
 ### `isLoading` + `error`:
@@ -280,9 +280,16 @@ export default graphql(gql`
 
 ### `onBefore` + `onAfter`:
 
-`onBefore/After` are callbacks called before and after the wrapped component changes. They are also called on `componentWillMount`. However `onBefore` is never called on the server since both callbacks would always render back to back synchronously. If you chose to use `onAfter` on the server, make sure the client renders the same thing on first load or you will have checksum mismatches.
+`onBefore/After` are callbacks called before and after the wrapped component loads on both `componentWillMount` and `componentWillReceiveProps`. This enables you to display `loading` indicators elsewhere in the UI.
 
-The primary use case for these callbacks is for triggering *loading* state **outside** of the component *on the client during child component transitions*. You can use its `info` argument and keys like `info.isSync` to determine what you want to do. Here's an example:
+If the component is already cached or you're on the server, they will both be called ***back to back synchronously***. They're both still called in this case for consistency. Each receives an `info` object, giving you full flexibility in terms of deciding what to do. Here are the keys on it:
+
+- `isMount` *(whether the component just mounted)*
+- `isSync` *(whether the imported component is already available from previous usage and required synchronsouly)*
+- `isServer` *(very rarely will you want to do stuff on the server; note: server will always be sync)*
+
+`onAfter` is also passed a second argument containing the imported `Component`, which you can use to do things like call its static methods.
+
 
 ```js
 const UniversalComponent = univesal(props => import(`./props.page`))
@@ -299,17 +306,7 @@ const MyComponent = ({ dispatch, isLoading }) =>
   </div>
 ```
 
-Each callback is passed an `info` argument containing these keys: 
-
-- `isMount` *(whether the component just mounted)*
-- `isSync` *(whether the imported component is already available from previous usage and  required synchronsouly)*
-
-**`onAfter` only:**
-- `isServer` *(very rarely will you want to do stuff on the server; note: server will always be sync)*
-
-`onAfter` is also passed a second argument containing the imported `Component`, which you can use to do things like call its static methods.
-
-> NOTE: `onBefore` and `onAfter` will fire synchronously a millisecond a part after the first time `Component` loads (and on the server). Your options are to only trigger loading state when `!info.isSync` as in the above example, or you can use the `info` argument with `minDelay` + `alwaysDelay` to insure the 2 callbacks always fire, e.g., *300ms* a part. The latter can be helpful to produce consistent glitch-free animations. A consistent `300ms` or even `500ms` wait doesn't hurt user-experience--what does is unpredictability, glitchy animations and large bundles 😀
+> Keep in mind `setState` won't work synchronously during `componentWillMount` since the component is already in the middle of being rendered within the parent on which `this.setState` will be called. You can use *Redux* to call `dispatch` and that will affect child components. It's best to use this primarily for setting up and tearing down loading state on the client, and nothing more. If you chose to use them on the server, make sure the client renders the same thing on first load or you will have checksum mismatches. 
 
 
 
