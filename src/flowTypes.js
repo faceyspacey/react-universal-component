@@ -91,14 +91,14 @@ export type Ids = Array<string>
 export type State = { error?: any, Component?: ?any }
 
 type Info = { isMount: boolean, isSync: boolean, isServer: boolean }
-type OnBeforeChange = Info => void
-type OnAfterChange = (Info, any) => void
+type OnBefore = Info => void
+type OnAfter = (Info, any) => void
 
 export type Props = {
   error?: ?any,
   isLoading?: ?boolean,
-  onBeforeChange?: OnBeforeChange,
-  onAfterChange?: OnAfterChange
+  OnBefore?: OnBefore,
+  OnAfter?: OnAfter
 }
 
 export type GenericComponent<Props> =

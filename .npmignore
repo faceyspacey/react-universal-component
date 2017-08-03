@@ -18,3 +18,4 @@ webpack.config.js
 .eslintignore
 .flowconfig
 *.png
+yarn.lock

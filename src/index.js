@@ -155,10 +155,10 @@ export default function universal<Props: Props>(
       isSync: boolean,
       isServer?: boolean = false
     ) {
-      if (this.props.onBeforeChange) {
-        const onBeforeChange = this.props.onBeforeChange
+      if (typeof this.props.onBefore === 'function') {
+        const onBefore = this.props.onBefore
         const info = { isMount, isSync, isServer }
-        onBeforeChange(info)
+        onBefore(info)
       }
     }
 
@@ -168,14 +168,16 @@ export default function universal<Props: Props>(
       isSync: boolean,
       isServer: boolean
     ) {
-      if (state.Component && !state.error) {
-        hoist(UniversalComponent, state.Component, { preload: true })
+      const { Component, error } = state
+
+      if (Component && state.error) {
+        hoist(UniversalComponent, Component, { preload: true })
       }
 
-      if (state.Component && !state.error && this.props.onAfterChange) {
-        const onAfterChange = this.props.onAfterChange
+      if (Component && !error && typeof this.props.onAfter === 'function') {
+        const onAfter = this.props.onAfter
         const info = { isMount, isSync, isServer }
-        this.setState(state, () => onAfterChange(info, state.Component))
+        this.setState(state, () => onAfter(info, Component))
         return
       }
 
