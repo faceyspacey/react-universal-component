@@ -158,7 +158,7 @@ export default function universal<Props: Props>(
       isSync: boolean,
       isServer?: boolean = false
     ) {
-      if (typeof this.props.onBefore === 'function') {
+      if (this.props.onBefore) {
         const onBefore = this.props.onBefore
         const info = { isMount, isSync, isServer }
         onBefore(info)
@@ -176,7 +176,7 @@ export default function universal<Props: Props>(
       if (Component && !error) {
         hoist(UniversalComponent, Component, { preload: true })
 
-        if (this.props.onAfter === 'function') {
+        if (this.props.onAfter) {
           const { onAfter } = this.props
           const info = { isMount, isSync, isServer }
           onAfter(info, Component)
