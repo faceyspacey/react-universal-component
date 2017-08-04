@@ -42,7 +42,7 @@
 
 
 <p align="center">
-  <img src="https://s3-us-west-1.amazonaws.com/cdn.reactlandia.com/universal-component-banner.png" />
+  <img src="https://cdn.reactlandia.com/universal-component-banner.png" />
 </p>
 
 <p align="center">
@@ -100,10 +100,11 @@ That's probably because you were trapped in SPA land. If you didn't know how muc
 
 - [code-cracked-for-ssr-plus-splitting-in-reactlandia](https://medium.com/@faceyspacey/code-cracked-for-code-splitting-ssr-in-reactlandia-react-loadable-webpack-flush-chunks-and-1a6b0112a8b8)
 
-- [react-universal-component-2-and-babel-plugin-universal-import](https://medium.com/@faceyspacey/code-cracked-for-code-splitting-ssr-in-reactlandia-react-loadable-webpack-flush-chunks-and-1a6b0112a8b8) 🚀
+- [react-universal-component-2-and-babel-plugin-universal-import](https://medium.com/faceyspacey/announcing-react-universal-component-2-0-babel-plugin-universal-import-5702d59ec1f4) 🚀
 
 - [how-to-use-webpack-magic-comments-with-react-universal-component](https://medium.com/@faceyspacey/how-to-use-webpacks-new-magic-comment-feature-with-react-universal-component-ssr-a38fd3e296a)
 
+- [webpack-import-will-soon-fetch-js-and-css-heres-how-you-do-it-today](https://medium.com/faceyspacey/webpacks-import-will-soon-fetch-js-css-here-s-how-you-do-it-today-4eb5b4929852)
 
 ## Other Packages You Will Need/Want
 
