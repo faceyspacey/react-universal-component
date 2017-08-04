@@ -182,6 +182,11 @@ export default function universal<Props: Props>(
           onAfter(info, Component)
         }
       }
+      else if (error && this.props.onError) {
+        const { onError } = this.props
+        const info = { isMount, isSync, isServer }
+        onError(error)
+      }
 
       this.setState(state)
     }

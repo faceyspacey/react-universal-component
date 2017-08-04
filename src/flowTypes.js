@@ -93,12 +93,14 @@ export type State = { error?: any, Component?: ?any }
 type Info = { isMount: boolean, isSync: boolean, isServer: boolean }
 type OnBefore = Info => void
 type OnAfter = (Info, any) => void
+type OnErrorProp = (error: { message: string }) => void
 
 export type Props = {
   error?: ?any,
   isLoading?: ?boolean,
   onBefore?: OnBefore,
-  onAfter?: OnAfter
+  onAfter?: OnAfter,
+  onError?: OnErrorProp
 }
 
 export type GenericComponent<Props> =
