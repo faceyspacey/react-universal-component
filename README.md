@@ -309,7 +309,11 @@ const MyComponent = ({ dispatch, isLoading }) =>
 
 > Keep in mind if you call `setState` within these callbacks and they are called during `componentWillMount`, the `state` change will have no effect for that render. This is because the component is already in the middle of being rendered within the parent on which `this.setState` will be called. You can use *Redux* to call `dispatch` and that will affect child components. However, it's best to use this primarily for setting up and tearing down loading state on the client, and nothing more. If you chose to use them on the server, make sure the client renders the same thing on first load or you will have checksum mismatches. 
 
-- `onError` is similar to the `onError` static option, except it operates at the component level. Therefore you can bind to `this` of the parent component and call `this.setState()` or `this.props.dispatch()`. Again, it's use case is for when you want to show error information elsewhere in the UI besides just the place that the universal component would otherwise render :)
+### `onError`
+
+`onError` is similar to the `onError` static option, except it operates at the component level. Therefore you can bind to `this` of the parent component and call `this.setState()` or `this.props.dispatch()`. Again, it's use case is for when you want to show error information elsewhere in the UI besides just the place that the universal component would otherwise render. 
+
+**The reality is just having the `<UniversalComponent />` as the only placeholder where you can show loading and error information is very limiting and not good enough for real apps. Hence these props.**
 
 
 

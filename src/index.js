@@ -68,7 +68,15 @@ export default function universal<Props: Props>(
         options,
         this.props
       )
-      const Component = requireSync(this.props)
+
+      let Component
+
+      try {
+        Component = requireSync(this.props)
+      }
+      catch (error) {
+        return this.update({ error })
+      }
 
       this._asyncOnly = asyncOnly
       addModule(this.props) // record the module for SSR flushing :)
@@ -97,7 +105,15 @@ export default function universal<Props: Props>(
         )
 
         if (shouldUpdate(nextProps, this.props)) {
-          const Component = requireSync(nextProps)
+          let Component
+
+          try {
+            Component = requireSync(nextProps)
+          }
+          catch (error) {
+            return this.update({ error })
+          }
+
           this.handleBefore(false, !!Component)
 
           if (!Component) {
@@ -159,7 +175,7 @@ export default function universal<Props: Props>(
       isServer?: boolean = false
     ) {
       if (this.props.onBefore) {
-        const onBefore = this.props.onBefore
+        const { onBefore } = this.props
         const info = { isMount, isSync, isServer }
         onBefore(info)
       }
@@ -183,9 +199,7 @@ export default function universal<Props: Props>(
         }
       }
       else if (error && this.props.onError) {
-        const { onError } = this.props
-        const info = { isMount, isSync, isServer }
-        onError(error)
+        this.props.onError(error)
       }
 
       this.setState(state)
