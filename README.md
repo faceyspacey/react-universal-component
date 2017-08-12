@@ -2,12 +2,12 @@
   <img alt="Reactlandia Chat" src="https://s3-us-west-1.amazonaws.com/cdn.reactlandia.com/reactlandia-chat.png">
 </a>
 
-<a href="https://codesandbox.io/s/github/faceyspacey/redux-first-router-codesandbox/tree/master/?module=r1oVP5YEUZ" target="_blank">
-  <img alt="Edit React Universal Component on CodeSandBox" src="https://codesandbox.io/static/img/play-codesandbox.svg">
-</a>
-
 <a href="https://stackblitz.com/edit/react-pnzphy" target="_blank">
   <img alt="Edit React Universal Component on StackBlitz" src="https://raw.githubusercontent.com/gothinkster/realworld/master/media/edit_on_blitz.png" height="42">
+</a>
+
+<a href="https://codesandbox.io/s/github/faceyspacey/redux-first-router-codesandbox/tree/master/?module=r1oVP5YEUZ" target="_blank">
+  <img alt="Edit React Universal Component on CodeSandBox" src="https://codesandbox.io/static/img/play-codesandbox.svg">
 </a>
 
 
