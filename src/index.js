@@ -14,6 +14,8 @@ import type {
 
 import { DefaultLoading, DefaultError, isServer, createElement } from './utils'
 
+export { CHUNK_NAMES, MODULE_IDS } from './requireUniversalModule'
+
 let hasBabelPlugin = false
 
 // $FlowIgnore
