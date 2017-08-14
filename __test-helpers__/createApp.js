@@ -5,7 +5,7 @@ import {
   createBablePluginComponent,
   createDynamicBablePluginComponent
 } from './index'
-import universal from '../src'
+import universal from '../src/browser'
 
 export const createPath = name => path.join(__dirname, '../__fixtures__', name)
 

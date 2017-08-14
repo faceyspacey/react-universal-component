@@ -3,7 +3,7 @@ import path from 'path'
 import React from 'react'
 import renderer from 'react-test-renderer'
 
-import universal from '../src'
+import universal from '../src/browser'
 import { flushModuleIds, flushChunkNames } from '../src/requireUniversalModule'
 
 import {
