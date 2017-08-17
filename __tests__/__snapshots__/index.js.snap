@@ -203,7 +203,7 @@ exports[`other options minDelay: loads for duration of minDelay even if componen
 exports[`other options onLoad (async): is called and passed an es6 module 1`] = `
 <p>
   MyComponent 
-  {}
+  {"foo":"bar"}
 </p>
 `;
 

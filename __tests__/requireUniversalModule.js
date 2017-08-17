@@ -362,10 +362,13 @@ describe('other options', () => {
       key: 'default'
     })
 
-    await requireAsync()
+    const props = { foo: 'bar' }
+    const context = {}
+    await requireAsync(props, context)
 
-    expect(onLoad).toBeCalledWith(mod, { isServer: false, isSync: false })
-    expect(onLoad).not.toBeCalledWith('foo', { isServer: false, isSync: false })
+    const info = { isServer: false, isSync: false }
+    expect(onLoad).toBeCalledWith(mod, info, props, context)
+    expect(onLoad).not.toBeCalledWith('foo', info, props)
   })
 
   it('onLoad (sync): is called and passed entire module', async () => {
@@ -384,10 +387,13 @@ describe('other options', () => {
       key: 'default'
     })
 
-    requireSync()
+    const props = { foo: 'bar' }
+    const context = {}
+    requireSync(props, context)
 
-    expect(onLoad).toBeCalledWith(mod, { isServer: false, isSync: true })
-    expect(onLoad).not.toBeCalledWith('foo', { isServer: false, isSync: true })
+    const info = { isServer: false, isSync: true }
+    expect(onLoad).toBeCalledWith(mod, info, props, context)
+    expect(onLoad).not.toBeCalledWith('foo', info, props)
 
     delete global.__webpack_require__
     delete global.__webpack_modules__

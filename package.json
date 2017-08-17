@@ -73,6 +73,7 @@
     "url": "https://github.com/faceyspacey/react-universal-component.git"
   },
   "dependencies": {
-    "hoist-non-react-statics": "^2.2.1"
+    "hoist-non-react-statics": "^2.2.1",
+    "prop-types": "^15.5.10"
   }
 }

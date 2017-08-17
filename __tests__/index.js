@@ -273,10 +273,13 @@ describe('other options', () => {
     const asyncComponent = createComponent(40, mod)
     const Component = universal(asyncComponent, { onLoad })
 
-    const component = renderer.create(<Component />)
+    const component = renderer.create(<Component foo='bar' />)
 
     await waitFor(50)
-    expect(onLoad).toBeCalledWith(mod, { isServer: false, isSync: false })
+    const info = { isServer: false, isSync: false }
+    const props = { foo: 'bar' }
+    const context = {}
+    expect(onLoad).toBeCalledWith(mod, info, props, context)
 
     expect(component.toJSON()).toMatchSnapshot() // success
   })
@@ -293,7 +296,9 @@ describe('other options', () => {
     const component = renderer.create(<Component />)
 
     await waitFor(50)
-    expect(onLoad).toBeCalledWith(mod, { isServer: false, isSync: false })
+    const info = { isServer: false, isSync: false }
+    const context = {}
+    expect(onLoad).toBeCalledWith(mod, info, {}, context)
 
     expect(component.toJSON()).toMatchSnapshot() // success
   })
@@ -309,10 +314,15 @@ describe('other options', () => {
 
     renderer.create(<Component />)
 
-    expect(onLoad).toBeCalledWith(require('../__fixtures__/component'), {
-      isServer: false,
-      isSync: true
-    })
+    expect(onLoad).toBeCalledWith(
+      require('../__fixtures__/component'),
+      {
+        isServer: false,
+        isSync: true
+      },
+      {},
+      {}
+    )
   })
 
   it('minDelay: loads for duration of minDelay even if component ready', async () => {

@@ -59,9 +59,14 @@ test('requireById: requires module for babel or webpack depending on environment
 test('resolveExport: finds export and calls onLoad', () => {
   const onLoad = jest.fn()
   const mod = { foo: 'bar' }
-  const exp = resolveExport(mod, 'foo', onLoad)
+  const props = { baz: 123 }
+  const context = {}
+
+  const exp = resolveExport(mod, 'foo', onLoad, undefined, props, context)
   expect(exp).toEqual('bar')
-  expect(onLoad).toBeCalledWith(mod, { isServer: false, isSync: false })
+
+  const info = { isServer: false, isSync: false }
+  expect(onLoad).toBeCalledWith(mod, info, props, context)
   // todo: test caching
 })
 
