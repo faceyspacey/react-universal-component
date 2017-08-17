@@ -2,10 +2,13 @@
   <img alt="Reactlandia Chat" src="https://s3-us-west-1.amazonaws.com/cdn.reactlandia.com/reactlandia-chat.png">
 </a>
 
-<a href="https://codesandbox.io/s/github/faceyspacey/redux-first-router-codesandbox/tree/master/?module=r1oVP5YEUZ" target="_blank">
-  <img alt="Edit Redux-First Router Demo" src="https://codesandbox.io/static/img/play-codesandbox.svg">
+<a href="https://stackblitz.com/edit/react-pnzphy" target="_blank">
+  <img alt="Edit React Universal Component on StackBlitz" src="https://raw.githubusercontent.com/gothinkster/realworld/master/media/edit_on_blitz.png" height="42">
 </a>
 
+<a href="https://codesandbox.io/s/github/faceyspacey/redux-first-router-codesandbox/tree/master/?module=r1oVP5YEUZ" target="_blank">
+  <img alt="Edit React Universal Component on CodeSandBox" src="https://codesandbox.io/static/img/play-codesandbox.svg">
+</a>
 
 
 # React Universal Component 2.0
@@ -49,7 +52,9 @@
 🍾🍾🍾 <a href="https://github.com/faceyspacey/universal-demo">GIT CLONE 2.0 LOCAL DEMO</a> 🚀🚀🚀
 </p>
 
-For "power users" the SPA is dead. If you're not universally rendering on the server you're doing it "wrong." You're losing money for you, your clients, your employers. All hail the Google god.
+For "power users" the SPA is dead. If you're not universally rendering on the server you're doing it "wrong." You're losing money for you, your clients, your employers. All hail the Google god. 
+
+The real problem has been **simultaneous SSR + Splitting**. If you've ever attempted such, *you know*. This is a one-of-a-kind solution that brings it all together.
 
 *This is the final universal component for React you'll ever need, and it looks like this:*
 
@@ -68,7 +73,9 @@ It's made possible by our [PR to webpack](https://github.com/webpack/webpack/pul
 
 You no longer need to create a hash of all your universal or loadable components. You can frictionlessly support multiple components in one HoC as if imports weren't static. This seamingly small thing--we predict--will lead to universal rendering finally becoming commonplace. It's what a universal component for React is supposed to be.
 
-Of course, you also need [webpack-flush-chunks](https://github.com/faceyspacey/webpack-flush-chunks) to bring this together server-side. Ultimately that's the real foundation here and the most challenging part. Packages in the past like *React Loadable* did not address this aspect. They excelled at the SPA. In terms of universal rendering, they got you maybe 15% of the way by providing the module IDs rendered. There's a lot more than that.
+Of course, you also need [webpack-flush-chunks](https://github.com/faceyspacey/webpack-flush-chunks) to bring this together server-side. Ultimately that's the real foundation here and the most challenging part. Packages in the past like *React Loadable* did not address this aspect. They excelled at the SPA. In terms of universal rendering, they got you maybe 15% of the way by providing the module IDs rendered. There's a lot more than that. 
+
+**Webpack Flush Chunks** insures you serve all the chunks rendered on the server to the client in style. To be clear, it's been impossible until now. This is the first general solution to do it, and still the only one. You *must* use it in combination with React Universal Component to fulfill the universal code splitting dream.
 
 In the future both packages will be distilled into one product called `universal-render`--or ***"Universal"*** for short. The transition will be seamless. We're making this space as easy as possible for "power users" like yourself that prefer the *frameworkless* approach over the constraints of a framework like Next.js.
 
@@ -98,9 +105,9 @@ That's probably because you were trapped in SPA land. If you didn't know how muc
 
 **Reactlandia Articles:**
 
-- [code-cracked-for-ssr-plus-splitting-in-reactlandia](https://medium.com/@faceyspacey/code-cracked-for-code-splitting-ssr-in-reactlandia-react-loadable-webpack-flush-chunks-and-1a6b0112a8b8)
+- **[code-cracked-for-ssr-plus-splitting-in-reactlandia](https://medium.com/@faceyspacey/code-cracked-for-code-splitting-ssr-in-reactlandia-react-loadable-webpack-flush-chunks-and-1a6b0112a8b8)** 🚀
 
-- [announcing-react-universal-component-2-and-babel-plugin-universal-import](https://medium.com/faceyspacey/announcing-react-universal-component-2-0-babel-plugin-universal-import-5702d59ec1f4) 🚀
+- **[announcing-react-universal-component-2-and-babel-plugin-universal-import](https://medium.com/faceyspacey/announcing-react-universal-component-2-0-babel-plugin-universal-import-5702d59ec1f4)** 🚀🚀🚀
 
 - [how-to-use-webpack-magic-comments-with-react-universal-component](https://medium.com/@faceyspacey/how-to-use-webpacks-new-magic-comment-feature-with-react-universal-component-ssr-a38fd3e296a)
 

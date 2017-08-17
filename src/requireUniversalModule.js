@@ -25,8 +25,8 @@ export const isServer = typeof window === 'undefined' || IS_TEST
 declare var __webpack_require__: Function
 declare var __webpack_modules__: Object
 
-const CHUNK_NAMES = new Set()
-const MODULE_IDS = new Set()
+export const CHUNK_NAMES = new Set()
+export const MODULE_IDS = new Set()
 
 export default function requireUniversalModule<Props: Props>(
   universalConfig: Config | ConfigFunc,
