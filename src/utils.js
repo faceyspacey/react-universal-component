@@ -31,10 +31,11 @@ export const requireById = (id: Id): ?any => {
 
 export const resolveExport = (
   mod: ?Mod,
-  key?: Key,
-  onLoad?: OnLoad,
-  chunkName?: StrFun,
+  key: ?Key,
+  onLoad: ?OnLoad,
+  chunkName: ?StrFun,
   props: Object,
+  context: Object,
   modCache: Object,
   isSync?: boolean = false
 ) => {
@@ -42,7 +43,7 @@ export const resolveExport = (
   if (onLoad && mod) {
     const isServer = typeof window === 'undefined'
     const info = { isServer, isSync }
-    onLoad(mod, info)
+    onLoad(mod, info, props, context)
   }
   if (chunkName && exp) cacheExport(exp, chunkName, props, modCache)
   return exp

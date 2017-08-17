@@ -1,5 +1,6 @@
 // @flow
 import React from 'react'
+import PropTypes from 'prop-types'
 import hoist from 'hoist-non-react-statics'
 import req from './requireUniversalModule'
 
@@ -46,17 +47,23 @@ export default function universal<Props: Props>(
     _mounted: boolean
     _asyncOnly: boolean
     _component: ?Object
-    props: Props
-    state: State
 
-    static preload(props: Props) {
+    state: State
+    props: Props
+    context: Object
+
+    static preload(props: Props, context: Object = {}) {
       props = props || {}
       const { requireAsync } = req(component, options, props)
-      return requireAsync(props)
+      return requireAsync(props, context)
     }
 
-    constructor(props: Props) {
-      super(props)
+    static contextTypes = {
+      store: PropTypes.object
+    }
+
+    constructor(props: Props, context: {}) {
+      super(props, context)
       this.state = { error: null }
     }
 
@@ -72,7 +79,7 @@ export default function universal<Props: Props>(
       let Component
 
       try {
-        Component = requireSync(this.props)
+        Component = requireSync(this.props, this.context)
       }
       catch (error) {
         return this.update({ error })
@@ -108,7 +115,7 @@ export default function universal<Props: Props>(
           let Component
 
           try {
-            Component = requireSync(nextProps)
+            Component = requireSync(nextProps, this.context)
           }
           catch (error) {
             return this.update({ error })
@@ -131,7 +138,9 @@ export default function universal<Props: Props>(
           this.update(state, false, true)
         }
         else if (isHMR()) {
-          requireSync(nextProps) // just needs to be required again to complete HMR
+          const Component = requireSync(nextProps, this.context)
+          this.setState({ Component: () => null }) // HMR /w Redux and HOCs can be finicky, so we
+          setTimeout(() => this.setState({ Component })) // toggle components to insure updates occur
         }
       }
     }
@@ -143,7 +152,7 @@ export default function universal<Props: Props>(
 
       const time = new Date()
 
-      requireAsync(props)
+      requireAsync(props, this.context)
         .then((Component: ?any) => {
           const state = { Component }
 

@@ -69,12 +69,14 @@ export type Id = string
 export type Key = string | null | ((module: ?(Object | Function)) => any)
 export type OnLoad = (
   module: ?(Object | Function),
-  info: { isServer: boolean }
+  info: { isServer: boolean },
+  props: Object,
+  context: Object
 ) => void
 export type OnError = (error: Object, info: { isServer: boolean }) => void
 
-export type RequireAsync = (props: Object) => Promise<?any>
-export type RequireSync = (props: Object) => ?any
+export type RequireAsync = (props: Object, context: Object) => Promise<?any>
+export type RequireSync = (props: Object, context: Object) => ?any
 export type AddModule = (props: Object) => void
 export type Mod = Object | Function
 export type Tools = {
