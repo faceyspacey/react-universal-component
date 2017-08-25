@@ -19,8 +19,10 @@ export { CHUNK_NAMES, MODULE_IDS } from './requireUniversalModule'
 
 let hasBabelPlugin = false
 
-// $FlowIgnore
-const isHMR = () => module.hot && module.hot.data
+
+const isHMR = () =>
+  // $FlowIgnore
+  module.hot && (module.hot.data || module.hot.status() === 'apply')
 
 export const setHasBabelPlugin = () => {
   hasBabelPlugin = true
