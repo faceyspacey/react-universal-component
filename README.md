@@ -310,7 +310,7 @@ If the component is already cached or you're on the server, they will both be ca
 
 
 ```js
-const UniversalComponent = univesal(props => import(`./props.page`))
+const UniversalComponent = universal(props => import(`./props.page`))
 
 const MyComponent = ({ dispatch, isLoading }) =>
   <div>
