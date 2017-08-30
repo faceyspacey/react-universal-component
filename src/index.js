@@ -19,7 +19,6 @@ export { CHUNK_NAMES, MODULE_IDS } from './requireUniversalModule'
 
 let hasBabelPlugin = false
 
-
 const isHMR = () =>
   // $FlowIgnore
   module.hot && (module.hot.data || module.hot.status() === 'apply')
@@ -48,6 +47,7 @@ export default function universal<Props: Props>(
   options.promCache = {}
 
   return class UniversalComponent extends React.Component<void, Props, *> {
+    /* eslint-disable react/sort-comp */
     _mounted: boolean
     _asyncOnly: boolean
     _component: ?Object
@@ -55,10 +55,22 @@ export default function universal<Props: Props>(
     state: State
     props: Props
     context: Object
+    /* eslint-enable react/sort-comp */
 
     static preload(props: Props, context: Object = {}) {
       props = props || {}
-      const { requireAsync } = req(component, options, props)
+      const { requireAsync, requireSync } = req(component, options, props)
+      let Component
+
+      try {
+        Component = requireSync(props, context)
+      }
+      catch (error) {
+        return Promise.reject(error)
+      }
+
+      if (Component) return Promise.resolve(Component)
+
       return requireAsync(props, context)
     }
 

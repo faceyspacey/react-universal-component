@@ -24,7 +24,8 @@ import {
   createComponent,
   createDynamicComponent,
   createBablePluginComponent,
-  createDynamicBablePluginComponent
+  createDynamicBablePluginComponent,
+  dynamicBabelNodeComponent
 } from '../__test-helpers__'
 
 describe('async lifecycle', () => {
@@ -590,6 +591,20 @@ describe('advanced', () => {
 
     const component2 = renderer.create(<Component />)
     expect(component2.toJSON()).toMatchSnapshot() // success
+  })
+
+  it('Component.preload: static preload method on node', async () => {
+    const onLoad = jest.fn()
+    const onErr = jest.fn()
+    const opts = { testBabelPlugin: true }
+
+    const Component = universal(dynamicBabelNodeComponent, opts)
+    await Component.preload({ page: 'component' }).then(onLoad, onErr)
+
+    expect(onErr).not.toHaveBeenCalled()
+
+    const targetComponent = require(createPath('component')).default
+    expect(onLoad).toBeCalledWith(targetComponent)
   })
 
   it('promise passed directly', async () => {
