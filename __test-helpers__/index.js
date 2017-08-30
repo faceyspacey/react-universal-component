@@ -78,3 +78,11 @@ export const createDynamicBablePluginComponent = (
     file: `${page}.js`
   })
 }
+
+export const dynamicBabelNodeComponent = ({ page }) => ({
+  chunkName: () => page,
+  path: () => createPath(page),
+  resolve: () => createPath(page),
+  id: page,
+  file: `${page}.js`
+})
