@@ -27,6 +27,7 @@ declare var __webpack_modules__: Object
 
 export const CHUNK_NAMES = new Set()
 export const MODULE_IDS = new Set()
+export const MODULES: Map<string, any> = new Map()
 
 export default function requireUniversalModule<Props: Props>(
   universalConfig: Config | ConfigFunc,
@@ -75,6 +76,7 @@ export default function requireUniversalModule<Props: Props>(
           props,
           context,
           modCache,
+          MODULES,
           true
         )
       }
@@ -115,7 +117,8 @@ export default function requireUniversalModule<Props: Props>(
           chunkName,
           props,
           context,
-          modCache
+          modCache,
+          MODULES
         )
         if (exp) return res(exp)
 
@@ -208,10 +211,11 @@ const getConfig = (
       : universalConfig
   }
 
-  const load: Load = typeof universalConfig === 'function'
-    ? universalConfig
-    : // $FlowIssue
-      () => universalConfig
+  const load: Load =
+    typeof universalConfig === 'function'
+      ? universalConfig
+      : // $FlowIssue
+        () => universalConfig
 
   return {
     file: 'default',

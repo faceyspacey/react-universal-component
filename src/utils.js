@@ -9,8 +9,9 @@ export const babelInterop = (mod: ?Mod) =>
   mod && typeof mod === 'object' && mod.__esModule ? mod.default : mod
 
 export const DefaultLoading = () => <div>Loading...</div>
-export const DefaultError = ({ error }: { error: Object }) =>
+export const DefaultError = ({ error }: { error: Object }) => (
   <div>Error: {error && error.message}</div>
+)
 
 export const tryRequire = (id: Id): ?any => {
   try {
@@ -37,6 +38,7 @@ export const resolveExport = (
   props: Object,
   context: Object,
   modCache: Object,
+  modGlobalCache: Map<string, any>,
   isSync?: boolean = false
 ) => {
   const exp = findExport(mod, key)
@@ -44,6 +46,9 @@ export const resolveExport = (
     const isServer = typeof window === 'undefined'
     const info = { isServer, isSync }
     onLoad(mod, info, props, context)
+  }
+  if (chunkName) {
+    modGlobalCache.set(callForString(chunkName, props), mod)
   }
   if (chunkName && exp) cacheExport(exp, chunkName, props, modCache)
   return exp
@@ -61,11 +66,13 @@ export const findExport = (mod: ?Mod, key?: Key): ?any => {
 }
 
 export const createElement = (Component: any, props: {}) =>
-  React.isValidElement(Component)
-    ? React.cloneElement(Component, props)
-    : <Component {...props} />
+  React.isValidElement(Component) ? (
+    React.cloneElement(Component, props)
+  ) : (
+    <Component {...props} />
+  )
 
-export const callForString = (strFun: StrFun, props: Object) =>
+export const callForString = (strFun: StrFun, props: Object): string =>
   typeof strFun === 'function' ? strFun(props) : strFun
 
 export const loadFromCache = (
