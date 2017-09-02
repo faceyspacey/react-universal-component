@@ -16,13 +16,20 @@ test('tryRequire: requires module using key export finder + calls onLoad with mo
   expect(mod).toEqual(expectedModule)
 
   // webpack
-  global.__webpack_require__ = path => __webpack_modules__[path]
+  global.__webpack_require__ = path => __webpack_modules__[path]()
   global.__webpack_modules__ = {
-    [moduleEs6]: expectedModule
+    [moduleEs6]: () => expectedModule
   }
 
   mod = tryRequire(moduleEs6)
   expect(mod).toEqual(expectedModule)
+
+  // Bad Modules
+  const badEs6 = createPath('bad.es6')
+  global.__webpack_modules__ = {
+    [badEs6]: () => require(badEs6)
+  }
+  expect(() => tryRequire(badEs6)).toThrow()
 
   delete global.__webpack_require__
   delete global.__webpack_modules__
