@@ -4,11 +4,16 @@ import { createPath, waitFor, normalizePath } from '../__test-helpers__'
 
 import req, {
   flushModuleIds,
-  flushChunkNames
+  flushChunkNames,
+  clearModulesCache
 } from '../src/requireUniversalModule'
 
 const requireModule = (asyncImport, options, props) =>
-  req(asyncImport, { ...options, modCache: {}, promCache: {} }, props)
+  req(asyncImport, { ...options, promCache: {} }, props)
+
+beforeEach(() => {
+  clearModulesCache()
+})
 
 describe('requireSync: tries to require module synchronously on both the server and client', () => {
   it('babel', () => {

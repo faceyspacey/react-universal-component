@@ -43,7 +43,6 @@ export default function universal<Props: Props>(
 
   const isDynamic = hasBabelPlugin || testBabelPlugin
   options.isDynamic = isDynamic
-  options.modCache = {}
   options.promCache = {}
 
   return class UniversalComponent extends React.Component<void, Props, *> {

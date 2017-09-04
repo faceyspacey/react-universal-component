@@ -4,7 +4,11 @@ import React from 'react'
 import renderer from 'react-test-renderer'
 
 import universal from '../src'
-import { flushModuleIds, flushChunkNames } from '../src/requireUniversalModule'
+import {
+  flushModuleIds,
+  flushChunkNames,
+  clearModulesCache
+} from '../src/requireUniversalModule'
 
 import {
   createApp,
@@ -27,6 +31,11 @@ import {
   createDynamicBablePluginComponent,
   dynamicBabelNodeComponent
 } from '../__test-helpers__'
+
+beforeEach(() => {
+  // clear because callForString values are not unique in each case
+  clearModulesCache()
+})
 
 describe('async lifecycle', () => {
   it('loading', async () => {
@@ -252,7 +261,7 @@ describe('other options', () => {
     expect(component.toJSON()).toMatchSnapshot() // success
   })
 
-  it('key (function): resolves export to function return', async () => {
+  it.only('key (function): resolves export to function return', async () => {
     const asyncComponent = createComponent(20, { fooKey: MyComponent })
     const Component = universal(asyncComponent, {
       key: module => module.fooKey

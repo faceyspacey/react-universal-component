@@ -32,26 +32,27 @@ export const requireById = (id: Id): ?any => {
 
 export const resolveExport = (
   mod: ?Mod,
-  key: ?Key,
   onLoad: ?OnLoad,
   chunkName: ?StrFun,
   props: Object,
   context: Object,
-  modCache: Object,
   modGlobalCache: Map<string, any>,
+  onLoadGlobalCache: Map<any, Set<OnLoad>>,
   isSync?: boolean = false
 ) => {
-  const exp = findExport(mod, key)
-  if (onLoad && mod) {
-    const isServer = typeof window === 'undefined'
-    const info = { isServer, isSync }
-    onLoad(mod, info, props, context)
-  }
   if (chunkName) {
     modGlobalCache.set(callForString(chunkName, props), mod)
   }
-  if (chunkName && exp) cacheExport(exp, chunkName, props, modCache)
-  return exp
+  if (mod && !onLoadGlobalCache.has(mod)) {
+    onLoadGlobalCache.set(mod, new Set())
+  }
+  const onLoadModCache = onLoadGlobalCache.get(mod)
+  if (onLoad && onLoadModCache && !onLoadModCache.has(onLoad)) {
+    const isServer = typeof window === 'undefined'
+    const info = { isServer, isSync }
+    onLoad(mod, info, props, context)
+    onLoadModCache.add(onLoad)
+  }
 }
 
 export const findExport = (mod: ?Mod, key?: Key): ?any => {
@@ -74,19 +75,6 @@ export const createElement = (Component: any, props: {}) =>
 
 export const callForString = (strFun: StrFun, props: Object): string =>
   typeof strFun === 'function' ? strFun(props) : strFun
-
-export const loadFromCache = (
-  chunkName: StrFun,
-  props: Object,
-  modCache: Object
-) => modCache[callForString(chunkName, props)]
-
-export const cacheExport = (
-  exp: any,
-  chunkName: StrFun,
-  props: Object,
-  modCache: Object
-) => (modCache[callForString(chunkName, props)] = exp)
 
 export const loadFromPromiseCache = (
   chunkName: StrFun,
