@@ -56,21 +56,17 @@ test('requireById: requires module for babel or webpack depending on environment
   expect(() => requireById('/foo')).toThrow()
 })
 
-test('resolveExport: calls onLoad and updates caches', () => {
+test('resolveExport: finds export and calls onLoad', () => {
   const onLoad = jest.fn()
   const mod = { foo: 'bar' }
   const props = { baz: 123 }
   const context = {}
 
-  const modules = new Map()
-  const onLoadCache = new Map()
-
-  resolveExport(mod, onLoad, 'test', props, context, modules, onLoadCache)
+  const exp = resolveExport(mod, 'foo', onLoad, undefined, props, context)
+  expect(exp).toEqual('bar')
 
   const info = { isServer: false, isSync: false }
   expect(onLoad).toBeCalledWith(mod, info, props, context)
-  expect(modules.get('test')).toEqual(mod)
-  expect(onLoadCache.get(mod).has(onLoad)).toEqual(true)
   // todo: test caching
 })
 

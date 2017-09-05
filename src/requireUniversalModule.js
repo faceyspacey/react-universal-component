@@ -6,8 +6,7 @@ import type {
   Config,
   ConfigFunc,
   Props,
-  Load,
-  OnLoad
+  Load
 } from './flowTypes'
 
 import {
@@ -15,9 +14,9 @@ import {
   tryRequire,
   resolveExport,
   callForString,
+  loadFromCache,
   loadFromPromiseCache,
-  cacheProm,
-  findExport
+  cacheProm
 } from './utils'
 
 export const IS_TEST = process.env.NODE_ENV === 'test'
@@ -28,8 +27,6 @@ declare var __webpack_modules__: Object
 
 export const CHUNK_NAMES = new Set()
 export const MODULE_IDS = new Set()
-export const MODULES: Map<string, any> = new Map()
-export const ON_LOAD_CALLBACKS: Map<any, Set<OnLoad>> = new Map()
 
 export default function requireUniversalModule<Props: Props>(
   universalConfig: Config | ConfigFunc,
@@ -43,6 +40,7 @@ export default function requireUniversalModule<Props: Props>(
     onLoad,
     onError,
     isDynamic,
+    modCache,
     promCache
   } = options
 
@@ -51,9 +49,11 @@ export default function requireUniversalModule<Props: Props>(
   const asyncOnly = !path && !resolve
 
   const requireSync = (props: Object, context: Object): ?any => {
-    let mod = MODULES.get(callForString(chunkName, props))
+    let exp = loadFromCache(chunkName, props, modCache)
 
-    if (!mod) {
+    if (!exp) {
+      let mod
+
       if (!isWebpack() && path) {
         const modulePath = callForString(path, props) || ''
         mod = tryRequire(modulePath)
@@ -65,39 +65,27 @@ export default function requireUniversalModule<Props: Props>(
           mod = tryRequire(weakId)
         }
       }
+
+      if (mod) {
+        exp = resolveExport(
+          mod,
+          key,
+          onLoad,
+          chunkName,
+          props,
+          context,
+          modCache,
+          true
+        )
+      }
     }
 
-    if (!mod) return
-
-    resolveExport(
-      mod,
-      onLoad,
-      chunkName,
-      props,
-      context,
-      MODULES,
-      ON_LOAD_CALLBACKS,
-      true
-    )
-
-    return findExport(mod, key)
+    return exp
   }
 
   const requireAsync = (props: Object, context: Object): Promise<?any> => {
-    const cachedMod = MODULES.get(callForString(chunkName, props))
-    if (cachedMod) {
-      // in case if called with new onLoad function
-      resolveExport(
-        cachedMod,
-        onLoad,
-        chunkName,
-        props,
-        context,
-        MODULES,
-        ON_LOAD_CALLBACKS
-      )
-      return Promise.resolve(findExport(cachedMod, key))
-    }
+    const exp = loadFromCache(chunkName, props, modCache)
+    if (exp) return Promise.resolve(exp)
 
     const cachedPromise = loadFromPromiseCache(chunkName, props, promCache)
     if (cachedPromise) return cachedPromise
@@ -120,17 +108,15 @@ export default function requireUniversalModule<Props: Props>(
       const resolve = mod => {
         clearTimeout(timer)
 
-        resolveExport(
+        const exp = resolveExport(
           mod,
+          key,
           onLoad,
           chunkName,
           props,
           context,
-          MODULES,
-          ON_LOAD_CALLBACKS
+          modCache
         )
-
-        const exp = mod && findExport(mod, key)
         if (exp) return res(exp)
 
         reject(new Error('export not found'))
@@ -201,22 +187,13 @@ export default function requireUniversalModule<Props: Props>(
 export const flushChunkNames = (): Ids => {
   const chunks = Array.from(CHUNK_NAMES)
   CHUNK_NAMES.clear()
-  // do not clear MODULES as they won't change
-  ON_LOAD_CALLBACKS.clear()
   return chunks
 }
 
 export const flushModuleIds = (): Ids => {
   const ids = Array.from(MODULE_IDS)
   MODULE_IDS.clear()
-  // do not clear MODULES as they won't change
-  ON_LOAD_CALLBACKS.clear()
   return ids
-}
-
-// for test purpose
-export const clearModulesCache = () => {
-  MODULES.clear()
 }
 
 const getConfig = (

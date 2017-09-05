@@ -35,6 +35,7 @@ export type ModuleOptions = {
   onLoad?: OnLoad,
   alwaysUpdate?: boolean,
   isDynamic: boolean,
+  modCache: Object,
   promCache: Object,
   id?: string
 }
