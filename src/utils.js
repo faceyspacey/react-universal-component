@@ -9,9 +9,8 @@ export const babelInterop = (mod: ?Mod) =>
   mod && typeof mod === 'object' && mod.__esModule ? mod.default : mod
 
 export const DefaultLoading = () => <div>Loading...</div>
-export const DefaultError = ({ error }: { error: Object }) => (
+export const DefaultError = ({ error }: { error: Object }) =>
   <div>Error: {error && error.message}</div>
-)
 
 export const tryRequire = (id: Id): ?any => {
   try {
@@ -62,11 +61,9 @@ export const findExport = (mod: ?Mod, key?: Key): ?any => {
 }
 
 export const createElement = (Component: any, props: {}) =>
-  React.isValidElement(Component) ? (
-    React.cloneElement(Component, props)
-  ) : (
-    <Component {...props} />
-  )
+  React.isValidElement(Component)
+    ? React.cloneElement(Component, props)
+    : <Component {...props} />
 
 export const callForString = (strFun: StrFun, props: Object) =>
   typeof strFun === 'function' ? strFun(props) : strFun

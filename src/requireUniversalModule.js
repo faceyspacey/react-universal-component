@@ -208,11 +208,10 @@ const getConfig = (
       : universalConfig
   }
 
-  const load: Load =
-    typeof universalConfig === 'function'
-      ? universalConfig
-      : // $FlowIssue
-        () => universalConfig
+  const load: Load = typeof universalConfig === 'function'
+    ? universalConfig
+    : // $FlowIssue
+      () => universalConfig
 
   return {
     file: 'default',
