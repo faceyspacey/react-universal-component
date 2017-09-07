@@ -75,7 +75,7 @@ export const loadFromCache = (
   chunkName: StrFun,
   props: Object,
   modCache: Object
-) => modCache[callForString(chunkName, props)]
+) => !isServer && modCache[callForString(chunkName, props)]
 
 export const cacheExport = (
   exp: any,

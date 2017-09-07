@@ -51,7 +51,7 @@ export default function requireUniversalModule<Props: Props>(
   const requireSync = (props: Object, context: Object): ?any => {
     let exp = loadFromCache(chunkName, props, modCache)
 
-    if (!exp || isServer) {
+    if (!exp) {
       let mod
 
       if (!isWebpack() && path) {
