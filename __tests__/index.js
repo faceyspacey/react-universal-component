@@ -30,16 +30,16 @@ import {
 
 describe('async lifecycle', () => {
   it('loading', async () => {
-    const asyncComponent = createComponent(40, MyComponent)
+    const asyncComponent = createComponent(400, MyComponent)
     const Component = universal(asyncComponent)
 
     const component1 = renderer.create(<Component />)
     expect(component1.toJSON()).toMatchSnapshot() // initial
 
-    await waitFor(20)
+    await waitFor(200)
     expect(component1.toJSON()).toMatchSnapshot() // loading
 
-    await waitFor(20)
+    await waitFor(200)
     expect(component1.toJSON()).toMatchSnapshot() // loaded
 
     const component2 = renderer.create(<Component />)

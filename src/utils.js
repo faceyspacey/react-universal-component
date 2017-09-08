@@ -3,7 +3,13 @@ import React from 'react'
 
 import type { Id, Key, OnLoad, Mod, StrFun, ImportModule } from './flowTypes'
 
-export const isServer = typeof window === 'undefined'
+export const isTest = process.env.NODE_ENV === 'test'
+export const isServer = !(
+  typeof window !== 'undefined' &&
+  window.document &&
+  window.document.createElement
+)
+
 export const isWebpack = () => typeof __webpack_require__ !== 'undefined'
 export const babelInterop = (mod: ?Mod) =>
   mod && typeof mod === 'object' && mod.__esModule ? mod.default : mod
