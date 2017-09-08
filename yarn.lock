@@ -3741,6 +3741,13 @@ node-fetch@^1.0.1:
     encoding "^0.1.11"
     is-stream "^1.0.1"
 
+node-fetch@^1.7.1:
+  version "1.7.2"
+  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-1.7.2.tgz#c54e9aac57e432875233525f3c891c4159ffefd7"
+  dependencies:
+    encoding "^0.1.11"
+    is-stream "^1.0.1"
+
 node-int64@^0.4.0:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/node-int64/-/node-int64-0.4.0.tgz#87a9065cdb355d3182d8f94ce11188b825c68a3b"
@@ -5143,13 +5150,14 @@ travis-deploy-once@1.0.0-node-0.10-support:
     request-promise "^4.1.1"
     travis-ci "^2.1.1"
 
-travis-github-status@^1.4.0:
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/travis-github-status/-/travis-github-status-1.4.1.tgz#d6e195d90f2afc2d1113091fa7766dae5cdd40c8"
+travis-github-status@^1.6.3:
+  version "1.6.3"
+  resolved "https://registry.yarnpkg.com/travis-github-status/-/travis-github-status-1.6.3.tgz#85436c999feca06182855ab9bbacdd25ae5326a2"
   dependencies:
     codeclimate-test-reporter "^0.4.1"
     colors "^1.1.2"
     github "^9.2.0"
+    node-fetch "^1.7.1"
     snyk "^1.29.0"
 
 trim-newlines@^1.0.0:

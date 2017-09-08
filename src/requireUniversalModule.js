@@ -16,11 +16,10 @@ import {
   callForString,
   loadFromCache,
   loadFromPromiseCache,
-  cacheProm
+  cacheProm,
+  isServer,
+  isTest
 } from './utils'
-
-export const IS_TEST = process.env.NODE_ENV === 'test'
-export const isServer = typeof window === 'undefined' || IS_TEST
 
 declare var __webpack_require__: Function
 declare var __webpack_modules__: Object
@@ -135,11 +134,11 @@ export default function requireUniversalModule<Props: Props>(
   }
 
   const addModule = (props: Object): void => {
-    if (isServer) {
+    if (isServer || isTest) {
       if (chunkName) {
         const name = callForString(chunkName, props)
         if (name) CHUNK_NAMES.add(name)
-        if (!IS_TEST) return // makes tests way smaller to run both kinds
+        if (!isTest) return // makes tests way smaller to run both kinds
       }
 
       if (isWebpack()) {
