@@ -131,7 +131,7 @@ universal(asyncComponent, options)
 ```
 
 **asyncComponent:**
-- ```props => import(`./${page}`)```
+- ```props => import(`./${props.page}`)```
 - `import('./Foo')` *// doesn't need to be wrapped in a function when using the babel plugin!*
 - `(props, cb) => require.ensure([], require => cb(null, require('./Foo')))`
 
