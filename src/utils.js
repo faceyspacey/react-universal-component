@@ -26,7 +26,7 @@ export const tryRequire = (id: Id): ?any => {
     // warn if there was an error while requiring the chunk during development
     // this can sometimes lead the server to render the loading component.
     if (process.env.NODE_ENV === 'development') {
-      console.warn(`There was an error while loading chunk: ${id}: ${err.message}`)
+      console.warn(`chunk not available for synchronous require yet: ${id}: ${err.message}`)
     }
   }
 
