@@ -57,6 +57,7 @@ module.exports = {
     'import/no-named-default': 1,
     'no-unused-vars': 1,
     'import/no-unresolved': 1,
+    'react/no-multi-comp': 1,
     'flowtype/no-weak-types': 0,
     camelcase: 0,
     'import/no-dynamic-require': 0,

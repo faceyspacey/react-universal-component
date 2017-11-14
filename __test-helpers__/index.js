@@ -86,3 +86,27 @@ export const dynamicBabelNodeComponent = ({ page }) => ({
   id: page,
   file: `${page}.js`
 })
+
+export const createDynamicComponentAndOptions = (
+  delay,
+  components,
+  error = new Error('test error')
+) => {
+  const asyncImport = async page => {
+    await waitFor(delay)
+    const Component = components[page]
+    if (Component) return Component
+    throw error
+  }
+
+  const load = ({ page }) =>
+    Promise.all([asyncImport(page), 'css']).then(prom => prom[0])
+
+  const options = {
+    chunkName: ({ page }) => page,
+    path: ({ page }) => createPath(page),
+    resolve: ({ page }) => createPath(page)
+  }
+
+  return { load, options }
+}

@@ -25,7 +25,8 @@ import {
   createDynamicComponent,
   createBablePluginComponent,
   createDynamicBablePluginComponent,
-  dynamicBabelNodeComponent
+  dynamicBabelNodeComponent,
+  createDynamicComponentAndOptions
 } from '../__test-helpers__'
 
 describe('async lifecycle', () => {
@@ -654,6 +655,34 @@ describe('advanced', () => {
     }
 
     const Component = universal(asyncComponent, options)
+
+    class Container extends React.Component {
+      render() {
+        const page = (this.state && this.state.page) || 'MyComponent'
+        return <Component page={page} />
+      }
+    }
+
+    let instance
+    const component = renderer.create(<Container ref={i => (instance = i)} />)
+    expect(component.toJSON()).toMatchSnapshot() // loading...
+
+    await waitFor(2)
+    expect(component.toJSON()).toMatchSnapshot() // loaded
+
+    instance.setState({ page: 'MyComponent2' })
+
+    expect(component.toJSON()).toMatchSnapshot() // loading...
+    await waitFor(2)
+
+    expect(component.toJSON()).toMatchSnapshot() // loaded
+  })
+
+  it('componentWillReceiveProps: changes component (dynamic require) (no babel plugin)', async () => {
+    const components = { MyComponent, MyComponent2 }
+    const { load, options } = createDynamicComponentAndOptions(0, components)
+
+    const Component = universal(load, options)
 
     class Container extends React.Component {
       render() {
