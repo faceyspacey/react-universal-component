@@ -52,7 +52,7 @@
 🍾🍾🍾 <a href="https://github.com/faceyspacey/universal-demo">GIT CLONE 2.0 LOCAL DEMO</a> 🚀🚀🚀
 </p>
 
-For "power users" the SPA is dead. If you're not universally rendering on the server you're doing it "wrong." You're losing money for you, your clients, your employers. All hail the Google god. 
+For "power users" the SPA is dead. If you're not universally rendering on the server you're doing it "wrong." You're losing money for you, your clients, your employers. All hail the Google god.
 
 The real problem has been **simultaneous SSR + Splitting**. If you've ever attempted such, *you know*. This is a one-of-a-kind solution that brings it all together.
 
@@ -69,11 +69,11 @@ export default () =>
   </div>
 ```
 
-It's made possible by our [PR to webpack](https://github.com/webpack/webpack/pull/5235) which built support for ```require.resolveWeak(`'./${page}`)```. Before it couldn't be dynamic--i.e. it supported one module, not a folder of modules. 
+It's made possible by our [PR to webpack](https://github.com/webpack/webpack/pull/5235) which built support for ```require.resolveWeak(`'./${page}`)```. Before it couldn't be dynamic--i.e. it supported one module, not a folder of modules.
 
 You no longer need to create a hash of all your universal or loadable components. You can frictionlessly support multiple components in one HoC as if imports weren't static. This seamingly small thing--we predict--will lead to universal rendering finally becoming commonplace. It's what a universal component for React is supposed to be.
 
-Of course, you also need [webpack-flush-chunks](https://github.com/faceyspacey/webpack-flush-chunks) to bring this together server-side. Ultimately that's the real foundation here and the most challenging part. Packages in the past like *React Loadable* did not address this aspect. They excelled at the SPA. In terms of universal rendering, they got you maybe 15% of the way by providing the module IDs rendered. There's a lot more than that. 
+Of course, you also need [webpack-flush-chunks](https://github.com/faceyspacey/webpack-flush-chunks) to bring this together server-side. Ultimately that's the real foundation here and the most challenging part. Packages in the past like *React Loadable* did not address this aspect. They excelled at the SPA. In terms of universal rendering, they got you maybe 15% of the way by providing the module IDs rendered. There's a lot more than that.
 
 **Webpack Flush Chunks** ensures you serve all the chunks rendered on the server to the client in style. To be clear, it's been impossible until now. This is the first general solution to do it, and still the only one. You *must* use it in combination with React Universal Component to fulfill the universal code splitting dream.
 
@@ -141,7 +141,7 @@ The first argument can be a function that returns a promise, a promise itself, o
 
 - `loading`: LoadingComponent, -- *default: a simple one is provided for you*
 - `error`: ErrorComponent, -- *default: a simple one is provided for you*
-- `key`: `'foo'` || `module => module.foo` -- *default: `default` export in ES6 and `module.exports` in ES5* 
+- `key`: `'foo'` || `module => module.foo` -- *default: `default` export in ES6 and `module.exports` in ES5*
 - `timeout`: `15000` -- *default*
 - `onError`: `(error, { isServer }) => handleError(error, isServer)
 - `onLoad`: `(module, { isSync, isServer }, props, context) => do(module, isSync, isServer, props, context)`
@@ -164,7 +164,7 @@ The first argument can be a function that returns a promise, a promise itself, o
 
 - `onError` is a callback called if async imports fail. It does not apply to sync requires.
 
-- `onLoad` is a callback function that receives the *entire* module. It allows you to export and put to use things other than your `default` component export, like reducers, sagas, etc. E.g: 
+- `onLoad` is a callback function that receives the *entire* module. It allows you to export and put to use things other than your `default` component export, like reducers, sagas, etc. E.g:
 ```js
 onLoad: (module, info, props, context) => {
   context.store.replaceReducer({ ...otherReducers, foo: module.fooReducer })
@@ -187,14 +187,14 @@ onLoad: (module, info, props, context) => {
 Below is the most important thing on this page. It's a quick example of the connection between this package and [webpack-flush-chunks](https://github.com/faceyspacey/webpack-flush-chunks):
 
 ```js
-import { flushChunkNames } from 'react-universal-component/server'
+import { clearChunks, flushChunkNames } from 'react-universal-component/server'
 import flushChunks from 'webpack-flush-chunks'
 import ReactDOM from 'react-dom/server'
 
 export default function serverRender(req, res) => {
+  clearChunks()
   const app = ReactDOM.renderToString(<App />)
-
-  const { js, styles, cssHash } = flushChunks(webpackStats, { 
+  const { js, styles, cssHash } = flushChunks(webpackStats, {
     chunkNames: flushChunkNames()
   })
 
@@ -315,7 +315,7 @@ const UniversalComponent = universal(props => import(`./props.page`))
 const MyComponent = ({ dispatch, isLoading }) =>
   <div>
     {isLoading && <div>loading...</div>}
-  
+
     <UniversalComponent
       page={props.page}
       onBefore={({ isSync }) => !isSync && dispatch({ type: 'LOADING', true })}
@@ -328,11 +328,67 @@ const MyComponent = ({ dispatch, isLoading }) =>
 
 ### `onError`
 
-`onError` is similar to the `onError` static option, except it operates at the component level. Therefore you can bind to `this` of the parent component and call `this.setState()` or `this.props.dispatch()`. Again, it's use case is for when you want to show error information elsewhere in the UI besides just the place that the universal component would otherwise render. 
+`onError` is similar to the `onError` static option, except it operates at the component level. Therefore you can bind to `this` of the parent component and call `this.setState()` or `this.props.dispatch()`. Again, it's use case is for when you want to show error information elsewhere in the UI besides just the place that the universal component would otherwise render.
 
 **The reality is just having the `<UniversalComponent />` as the only placeholder where you can show loading and error information is very limiting and not good enough for real apps. Hence these props.**
 
+## Usage with CSS-in-JS libraries
 
+flushChunkNames relies on renderToString's synchronous execution to keep track of dynamic chunks. This is the same strategy used by CSS-in-JS frameworks to extract critical CSS for first render.
+
+To use these together, simply wrap the CSS library's callback with clearChunks() and flushChunkNames():
+
+### Example with Aphrodite
+
+```js
+import { StyleSheetServer } from 'aphrodite'
+import { clearChunks, flushChunkNames } from "react-universal-component/server"
+import ReactDOM from 'react-dom/server'
+
+clearChunks()
+// similar for emotion, aphodite, glamor, glamorous
+const { html, css} = StyleSheetServer.renderStatic(() => {
+  return ReactDOM.renderToString(app)
+})
+const chunkNames = flushChunkNames()
+
+// res.send template
+```
+
+Just like CSS-in-JS libraries, this library is not compatible with asynchronous renderToString replacements, such as react-dom-stream. Using the two together will give unpredictable results!
+
+## Usage with two-stage rendering
+
+Some data-fetching libraries require an additional step which walks the render tree (react-apollo, isomorphic-relay, react-tree-walker). These are compatible, as long as chunks are cleared after the collection step.
+
+### Example with react-apollo and Aphrodite
+
+```js
+import { getDataFromTree } from "react-apollo"
+import { StyleSheetServer } from 'aphrodite'
+import { clearChunks, flushChunkNames } from "react-universal-component/server"
+import ReactDOM from 'react-dom/server'
+
+const app = (
+  <ApolloProvider client={client}>
+    <App />
+  </ApolloProvider>
+)
+
+// If clearChunks() is run here, getDataFromTree() can cause chunks to leak between requests.
+getDataFromTree(app).then(() => {
+  const initialState = client.cache.extract()
+
+  // This is safe.
+  clearChunks()
+  const { html, css} = StyleSheetServer.renderStatic(() => {
+    return ReactDOM.renderToString(app)
+  })
+  const chunkNames = flushChunkNames()
+
+  // res.send template
+})
+```
 
 ## Universal Demo
 🍾🍾🍾 **[faceyspacey/universal-demo](https://github.com/faceyspacey/universal-demo)** 🚀🚀🚀
@@ -351,7 +407,7 @@ We use [commitizen](https://github.com/commitizen/cz-cli), so run `npm run cm` t
 
 ## Tests
 
-Reviewing a module's tests are a great way to get familiar with it. It's direct insight into the capabilities of the given module (if the tests are thorough). What's even better is a screenshot of the tests neatly organized and grouped (you know the whole "a picture says a thousand words" thing). 
+Reviewing a module's tests are a great way to get familiar with it. It's direct insight into the capabilities of the given module (if the tests are thorough). What's even better is a screenshot of the tests neatly organized and grouped (you know the whole "a picture says a thousand words" thing).
 
 Below is a screenshot of this module's tests running in [Wallaby](https://wallabyjs.com) *("An Integrated Continuous Testing Tool for JavaScript")* which everyone in the React community should be using. It's fantastic and has taken my entire workflow to the next level. It re-runs your tests on every change along with comprehensive logging, bi-directional linking to your IDE, in-line code coverage indicators, **and even snapshot comparisons + updates for Jest!** I requestsed that feature by the way :). It's basically a substitute for live-coding that inspires you to test along your journey.
 

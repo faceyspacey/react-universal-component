@@ -4,7 +4,8 @@ import { createPath, waitFor, normalizePath } from '../__test-helpers__'
 
 import req, {
   flushModuleIds,
-  flushChunkNames
+  flushChunkNames,
+  clearChunks
 } from '../src/requireUniversalModule'
 
 const requireModule = (asyncImport, options, props) =>
@@ -244,8 +245,7 @@ describe('requireAsync: requires module asynchronously on the client, returning 
 
 describe('addModule: add moduleId and chunkName for SSR flushing', () => {
   it('babel', () => {
-    flushModuleIds() // insure sets are empty:
-    flushChunkNames()
+    clearChunks()
 
     const moduleEs6 = createPath('es6')
     const moduleEs5 = createPath('es5')
@@ -278,8 +278,7 @@ describe('addModule: add moduleId and chunkName for SSR flushing', () => {
       [moduleEs5]: require(moduleEs5)
     }
 
-    flushModuleIds() // insure sets are empty:
-    flushChunkNames()
+    clearChunks()
 
     let universal = requireModule(undefined, {
       resolve: () => moduleEs6,
@@ -330,7 +329,6 @@ describe('other options', () => {
   })
 
   it('key (null): resolves export to be entire module', () => {
-    const modulePath = createPath('es6')
     const { requireSync } = requireModule(undefined, {
       path: path.join(__dirname, '../__fixtures__/es6'),
       key: null
