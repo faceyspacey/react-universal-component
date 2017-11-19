@@ -3,6 +3,7 @@
   "version": "0.0.0-development",
   "description": "A higher order component for loading components with promises",
   "main": "dist/index.js",
+  "typings": "index.d.ts",
   "author": "James FaceySpacey Gillmore <james@faceyspacey.com> (http://www.faceyspacey.com)",
   "license": "MIT",
   "bugs": {
