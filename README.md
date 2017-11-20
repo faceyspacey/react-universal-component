@@ -11,7 +11,7 @@
 </a>
 
 
-# React Universal Component 2.0
+# React Universal Component
 
 <p align="center">
   <a href="https://www.npmjs.com/package/react-universal-component">
