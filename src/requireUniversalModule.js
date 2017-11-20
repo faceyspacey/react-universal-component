@@ -182,6 +182,11 @@ export const flushModuleIds = (): Ids => {
   return ids
 }
 
+export const clearChunks = (): void => {
+  CHUNK_NAMES.clear()
+  MODULE_IDS.clear()
+}
+
 const getConfig = (
   isDynamic: ?boolean,
   universalConfig: Config | ConfigFunc,
@@ -194,10 +199,11 @@ const getConfig = (
       : universalConfig
   }
 
-  const load: Load = typeof universalConfig === 'function'
-    ? universalConfig
-    : // $FlowIssue
-      () => universalConfig
+  const load: Load =
+    typeof universalConfig === 'function'
+      ? universalConfig
+      : // $FlowIssue
+        () => universalConfig
 
   return {
     file: 'default',

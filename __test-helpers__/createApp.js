@@ -22,12 +22,13 @@ export const createApp = isWebpack => {
   const Component2 = create('component2')
   const Component3 = create('component3')
 
-  return props =>
-    (<div>
+  return props => (
+    <div>
       {props.one ? <Component1 /> : null}
       {props.two ? <Component2 /> : null}
       {props.three ? <Component3 /> : null}
-    </div>)
+    </div>
+  )
 }
 
 export const createDynamicApp = isWebpack => {
@@ -38,12 +39,13 @@ export const createDynamicApp = isWebpack => {
     resolve: isWebpack && (({ page }) => createPath(page))
   })
 
-  return props =>
-    (<div>
+  return props => (
+    <div>
       {props.one ? <Component page='component' /> : null}
       {props.two ? <Component page='component2' /> : null}
       {props.three ? <Component page='component3' /> : null}
-    </div>)
+    </div>
+  )
 }
 
 export const createBablePluginApp = isWebpack => {
@@ -61,12 +63,13 @@ export const createBablePluginApp = isWebpack => {
   const Component2 = create('component2')
   const Component3 = create('component3')
 
-  return props =>
-    (<div>
+  return props => (
+    <div>
       {props.one ? <Component1 /> : null}
       {props.two ? <Component2 /> : null}
       {props.three ? <Component3 /> : null}
-    </div>)
+    </div>
+  )
 }
 
 export const createDynamicBablePluginApp = isWebpack => {
@@ -79,10 +82,11 @@ export const createDynamicBablePluginApp = isWebpack => {
   const Component2 = create('component2')
   const Component3 = create('component3')
 
-  return props =>
-    (<div>
+  return props => (
+    <div>
       {props.one ? <Component1 page='component' /> : null}
       {props.two ? <Component2 page='component2' /> : null}
       {props.three ? <Component3 page='component3' /> : null}
-    </div>)
+    </div>
+  )
 }
