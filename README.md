@@ -181,7 +181,7 @@ export default function serverRender(req, res) => {
 
 If you build step and your render step are separate (i.e. using a static site generator like `react-static`) we can use a Provider type component to locate the components that should be included on the client. This is not the recommended use of locating chunk names and only should be used when absolutely necessary. It uses React's context functionality to pass the `report` function to react-universal-component.
 
-```
+```javascript
 import { ReportChunks } from 'react-universal-component'
 import flushChunks from 'webpack-flush-chunks'
 import ReactDOM from 'react-dom/server'
