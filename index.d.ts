@@ -99,7 +99,7 @@ declare module 'react-universal-component' {
      * _Note: this only applies to the client when
      * your `UniversalComponent` uses dynamic expressions to switch between multiple
      * components._
-     * 
+     *
      * default: `false`
      */
     alwaysDelay: boolean;
@@ -121,7 +121,7 @@ declare module 'react-universal-component' {
      * A callback function that receives the entire module.
      * It allows you to export and put to use things other than your
      * default component export, like reducers, sagas, etc.
-     * 
+     *
      * `onLoad` is fired directly before the component is rendered so you can setup
      * any reducers/etc it depends on. Unlike the `onAfter` prop, this option to the
      * `universal` HOC is only fired the first time the module is received. Also
@@ -166,7 +166,8 @@ declare module 'react-universal-component' {
 }
 
 declare module 'react-universal-component/server' {
+  const clearChunks: () => void;
   const flushChunkNames: () => string[];
 
-  export { flushChunkNames };
+  export { clearChunks, flushChunkNames };
 }
