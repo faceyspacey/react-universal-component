@@ -40,7 +40,7 @@ declare module 'react-universal-component' {
     onAfter(info: Info): void;
 
     /**
-     * onError is similar to the onError static option, except it operates at the component
+     * `onError` is similar to the onError static option, except it operates at the component
      * level. Therefore you can bind to this of the parent component and call
      * `this.setState()` or `this.props.dispatch()`.
      * Again, it's use case is for when you want to show error information elsewhere in the
@@ -91,8 +91,8 @@ declare module 'react-universal-component' {
     minDelay: number;
 
     /**
-     * alwaysDelay is a boolean you can set to true (default: false) to guarantee the
-     * minDelay is always used (i.e. even when components cached from previous imports
+     * `alwaysDelay` is a boolean you can set to true (default: false) to guarantee the
+     * `minDelay` is always used (i.e. even when components cached from previous imports
      * and therefore synchronously and instantly required). This can be useful for
      * guaranteeing animations operate as you want without having to wire up other
      * components to perform the task.
@@ -105,7 +105,7 @@ declare module 'react-universal-component' {
     alwaysDelay: boolean;
 
     /**
-     * When set to false allows you to keep showing the current component when the
+     * When set to `false` allows you to keep showing the current component when the
      * loading component would otherwise show during transitions from one component to
      * the next.
      */
