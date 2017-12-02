@@ -72,7 +72,7 @@ declare module 'react-universal-component' {
      * It can be a string corresponding to the export key, or a function that's
      * passed the entire module and returns the export that will become the component.
      */
-    key: string | ((module: Module<C>) => ComponentType<P>);
+    key: string | ((module: Export) => ComponentType<P>);
 
     /**
      * Allows you to specify a maximum amount of time before the error component
@@ -153,13 +153,13 @@ declare module 'react-universal-component' {
   export default function universal<
     P,
     C extends ComponentType<P> = ComponentType<P>,
-    Export extends Module<P> = Module<P>
+    Export extends Module<C> = Module<C>
   >(
     loadSpec:
-      | PromiseLike<Module<C>>
-      | ((props: P) => PromiseLike<Module<C>>)
+      | PromiseLike<Export>
+      | ((props: P) => PromiseLike<Export>)
       | {
-          load(props: P): PromiseLike<Module<C>>;
+          load(props: P): PromiseLike<Export>;
         },
     options?: Options<P, C, Export>,
   ): UniversalComponent<P>;
