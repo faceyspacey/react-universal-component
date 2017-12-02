@@ -15,8 +15,9 @@ declare module 'react-universal-component' {
     isSync: boolean;
 
     /*
-     * Very rarely will you want to do stuff on the server;
-     * Note: server will always be sync)
+     * Very rarely will you want to do stuff on the server.
+     * 
+     * _Note: server will always be sync_
      */
     isServer: boolean;
   };
@@ -91,7 +92,7 @@ declare module 'react-universal-component' {
     minDelay: number;
 
     /**
-     * `alwaysDelay` is a boolean you can set to true (default: false) to guarantee the
+     * `alwaysDelay` is a boolean you can set to true (default: `false`) to guarantee the
      * `minDelay` is always used (i.e. even when components cached from previous imports
      * and therefore synchronously and instantly required). This can be useful for
      * guaranteeing animations operate as you want without having to wire up other
