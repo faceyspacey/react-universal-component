@@ -15,8 +15,9 @@ declare module 'react-universal-component' {
     isSync: boolean;
 
     /*
-     * Very rarely will you want to do stuff on the server;
-     * Note: server will always be sync)
+     * Very rarely will you want to do stuff on the server.
+     * 
+     * _Note: server will always be sync_
      */
     isServer: boolean;
   };
@@ -40,7 +41,7 @@ declare module 'react-universal-component' {
     onAfter(info: Info): void;
 
     /**
-     * onError is similar to the onError static option, except it operates at the component
+     * `onError` is similar to the onError static option, except it operates at the component
      * level. Therefore you can bind to this of the parent component and call
      * `this.setState()` or `this.props.dispatch()`.
      * Again, it's use case is for when you want to show error information elsewhere in the
@@ -72,7 +73,7 @@ declare module 'react-universal-component' {
      * It can be a string corresponding to the export key, or a function that's
      * passed the entire module and returns the export that will become the component.
      */
-    key: string | ((module: Module<C>) => ComponentType<P>);
+    key: string | ((module: Export) => ComponentType<P>);
 
     /**
      * Allows you to specify a maximum amount of time before the error component
@@ -91,8 +92,8 @@ declare module 'react-universal-component' {
     minDelay: number;
 
     /**
-     * alwaysDelay is a boolean you can set to true (default: false) to guarantee the
-     * minDelay is always used (i.e. even when components cached from previous imports
+     * `alwaysDelay` is a boolean you can set to true (default: `false`) to guarantee the
+     * `minDelay` is always used (i.e. even when components cached from previous imports
      * and therefore synchronously and instantly required). This can be useful for
      * guaranteeing animations operate as you want without having to wire up other
      * components to perform the task.
@@ -105,7 +106,7 @@ declare module 'react-universal-component' {
     alwaysDelay: boolean;
 
     /**
-     * When set to false allows you to keep showing the current component when the
+     * When set to `false` allows you to keep showing the current component when the
      * loading component would otherwise show during transitions from one component to
      * the next.
      */
@@ -153,13 +154,13 @@ declare module 'react-universal-component' {
   export default function universal<
     P,
     C extends ComponentType<P> = ComponentType<P>,
-    Export extends Module<P> = Module<P>
+    Export extends Module<C> = Module<C>
   >(
     loadSpec:
-      | PromiseLike<Module<C>>
-      | ((props: P) => PromiseLike<Module<C>>)
+      | PromiseLike<Export>
+      | ((props: P) => PromiseLike<Export>)
       | {
-          load(props: P): PromiseLike<Module<C>>;
+          load(props: P): PromiseLike<Export>;
         },
     options?: Options<P, C, Export>,
   ): UniversalComponent<P>;
