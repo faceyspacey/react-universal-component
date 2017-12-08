@@ -16,6 +16,7 @@ import type {
 import { DefaultLoading, DefaultError, isServer, createElement } from './utils'
 
 export { CHUNK_NAMES, MODULE_IDS } from './requireUniversalModule'
+export { default as ReportChunks } from './report-chunks'
 
 let hasBabelPlugin = false
 
@@ -75,7 +76,8 @@ export default function universal<Props: Props>(
     }
 
     static contextTypes = {
-      store: PropTypes.object
+      store: PropTypes.object,
+      report: PropTypes.func
     }
 
     constructor(props: Props, context: {}) {
@@ -102,7 +104,11 @@ export default function universal<Props: Props>(
       }
 
       this._asyncOnly = asyncOnly
-      addModule(this.props) // record the module for SSR flushing :)
+      const chunkName = addModule(this.props) // record the module for SSR flushing :)
+
+      if (this.context.report) {
+        this.context.report(chunkName)
+      }
 
       if (Component || isServer) {
         this.handleBefore(true, true, isServer)

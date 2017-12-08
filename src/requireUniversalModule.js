@@ -133,21 +133,24 @@ export default function requireUniversalModule<Props: Props>(
     return prom
   }
 
-  const addModule = (props: Object): void => {
+  const addModule = (props: Object): ?string => {
     if (isServer || isTest) {
       if (chunkName) {
         const name = callForString(chunkName, props)
         if (name) CHUNK_NAMES.add(name)
-        if (!isTest) return // makes tests way smaller to run both kinds
+        if (!isTest) return name // makes tests way smaller to run both kinds
       }
 
       if (isWebpack()) {
         const weakId = callForString(resolve, props)
         if (weakId) MODULE_IDS.add(weakId)
+        return weakId
       }
-      else if (!isWebpack()) {
+
+      if (!isWebpack()) {
         const modulePath = callForString(path, props)
         if (modulePath) MODULE_IDS.add(modulePath)
+        return modulePath
       }
     }
   }

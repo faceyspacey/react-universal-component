@@ -77,7 +77,7 @@ export type OnError = (error: Object, info: { isServer: boolean }) => void
 
 export type RequireAsync = (props: Object, context: Object) => Promise<?any>
 export type RequireSync = (props: Object, context: Object) => ?any
-export type AddModule = (props: Object) => void
+export type AddModule = (props: Object) => ?string
 export type Mod = Object | Function
 export type Tools = {
   requireAsync: RequireAsync,
