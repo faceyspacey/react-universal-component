@@ -141,14 +141,14 @@ declare module 'react-universal-component' {
      * that displays while the primary import is loading.
      * While testing out this package, you can leave it out as a simple default one is used.
      */
-    loading(p: P): JSX.Element | ComponentType<P>;
+    loading: ((p: P) => JSX.Element | ComponentType<P>) | (JSX.Element | ComponentType<P>);
 
     /**
      * The component that displays if there are any errors that occur during
      * your aynschronous import. While testing out this package,
      * you can leave it out as a simple default one is used.
      */
-    error(p: P): JSX.Element | ComponentType<P & { error: Error }>;
+    error: ((p: P) => JSX.Element | ComponentType<P & { error: Error }>) | (JSX.Element | ComponentType<P & { error: Error }>);
   }>;
 
   export default function universal<
