@@ -41,7 +41,7 @@ export type ModuleOptions = {
 }
 
 export type ComponentOptions = {
-  loading?: LoadingCompponent,
+  loading?: LoadingComponent,
   error?: ErrorComponent,
   minDelay?: number,
   alwaysDelay?: boolean,
@@ -110,7 +110,7 @@ export type GenericComponent<Props> =
   | React$Element<any>
 
 export type Component<Props> = GenericComponent<Props>
-export type LoadingCompponent = GenericComponent<{}>
+export type LoadingComponent = GenericComponent<{}>
 export type ErrorComponent = GenericComponent<{}>
 
 // babel-plugin-universal-import
