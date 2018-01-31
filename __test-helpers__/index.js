@@ -1,11 +1,12 @@
 import path from 'path'
 import React from 'react'
+import slash from 'slash'
 
 // fake delay so we can test different stages of async loading lifecycle
 export const waitFor = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 // normalize the required path so tests pass in all environments
-export const normalizePath = path => path.split('__fixtures__')[1]
+export const normalizePath = path => slash(path.split('__fixtures__')[1])
 
 export const createPath = name => path.join(__dirname, '../__fixtures__', name)
 
