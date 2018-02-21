@@ -1,6 +1,12 @@
 declare module 'react-universal-component' {
   import * as React from 'react';
 
+  type ReportChunksProps = {
+    report(chunkName: string | undefined): void;
+  };
+
+  export class ReportChunks extends React.Component<ReportChunksProps> {}
+
   type ComponentType<P> =
     | React.ComponentType<P>
     | React.StatelessComponent<P>
