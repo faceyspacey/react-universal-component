@@ -197,6 +197,7 @@ export default function universal<Props: Props>(
     ) => {
       if (!this._mounted) return
       if (!state.error) state.error = null
+
       this.handleAfter(state, isMount, isSync, isServer)
     }
 
@@ -247,12 +248,12 @@ export default function universal<Props: Props>(
       else if (userError) {
         return createElement(Err, { ...props, error: userError })
       }
+      else if (error) {
+        return createElement(Err, { ...props, error })
+      }
       else if (Component) {
         // primary usage (for async import loading + errors):
         return createElement(Component, props)
-      }
-      else if (error) {
-        return createElement(Err, { ...props, error })
       }
 
       return createElement(Loading, props)
