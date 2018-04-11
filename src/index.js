@@ -70,9 +70,15 @@ export default function universal<Props: Props>(
         return Promise.reject(error)
       }
 
-      if (Component) return Promise.resolve(Component)
-
-      return requireAsync(props, context)
+      return Promise.resolve()
+        .then(() => {
+          if (Component) return Component
+          return requireAsync(props, context)
+        })
+        .then(Component => {
+          hoist(UniversalComponent, Component, { preload: true })
+          return Component
+        })
     }
 
     static contextTypes = {
