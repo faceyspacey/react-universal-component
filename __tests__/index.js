@@ -594,6 +594,25 @@ describe('advanced', () => {
     expect(component2.toJSON()).toMatchSnapshot() // success
   })
 
+  it('Component.preload: static preload method hoists non-react statics', async () => {
+    // define a simple component with static properties
+    const FooComponent = props => (
+      <div>FooComponent {JSON.stringify(props)}</div>
+    )
+    FooComponent.propTypes = {}
+    FooComponent.nonReactStatic = { foo: 'bar' }
+    // prepare that component to be universally loaded
+    const components = { FooComponent }
+    const asyncComponent = createDynamicComponent(40, components)
+    const Component = universal(asyncComponent)
+    // wait for preload to finish
+    await Component.preload({ page: 'FooComponent' })
+    // assert desired static is available
+    expect(Component).not.toHaveProperty('propTypes')
+    expect(Component).toHaveProperty('nonReactStatic')
+    expect(Component.nonReactStatic).toBe(FooComponent.nonReactStatic)
+  })
+
   it('Component.preload: static preload method on node', async () => {
     const onLoad = jest.fn()
     const onErr = jest.fn()
