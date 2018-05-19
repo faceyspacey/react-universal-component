@@ -76,7 +76,10 @@ export default function universal<Props: Props>(
           return requireAsync(props, context)
         })
         .then(Component => {
-          hoist(UniversalComponent, Component, { preload: true, preloadWeak: true })
+          hoist(UniversalComponent, Component, {
+            preload: true,
+            preloadWeak: true
+          })
           return Component
         })
     }
@@ -87,7 +90,10 @@ export default function universal<Props: Props>(
 
       const Component = requireSync(props, context)
       if (Component) {
-          hoist(UniversalComponent, Component, { preload: true, preloadWeak: true })
+        hoist(UniversalComponent, Component, {
+          preload: true,
+          preloadWeak: true
+        })
       }
 
       return Component
@@ -240,7 +246,10 @@ export default function universal<Props: Props>(
       const { Component, error } = state
 
       if (Component && !error) {
-        hoist(UniversalComponent, Component, { preload: true, preloadWeak: true })
+        hoist(UniversalComponent, Component, {
+          preload: true,
+          preloadWeak: true
+        })
 
         if (this.props.onAfter) {
           const { onAfter } = this.props
