@@ -76,9 +76,27 @@ export default function universal<Props: Props>(
           return requireAsync(props, context)
         })
         .then(Component => {
-          hoist(UniversalComponent, Component, { preload: true })
+          hoist(UniversalComponent, Component, {
+            preload: true,
+            preloadWeak: true
+          })
           return Component
         })
+    }
+
+    static preloadWeak(props: Props, context: Object = {}) {
+      props = props || {}
+      const { requireSync } = req(component, options, props)
+
+      const Component = requireSync(props, context)
+      if (Component) {
+        hoist(UniversalComponent, Component, {
+          preload: true,
+          preloadWeak: true
+        })
+      }
+
+      return Component
     }
 
     static contextTypes = {
@@ -228,7 +246,10 @@ export default function universal<Props: Props>(
       const { Component, error } = state
 
       if (Component && !error) {
-        hoist(UniversalComponent, Component, { preload: true })
+        hoist(UniversalComponent, Component, {
+          preload: true,
+          preloadWeak: true
+        })
 
         if (this.props.onAfter) {
           const { onAfter } = this.props

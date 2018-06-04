@@ -274,8 +274,18 @@ const MyUniversalComponent = universal(import('./MyComponent'))
 
 // call this only after you're sure it has loaded
 MyUniversalComponent.doSomething()
+
+// If you are not sure if the component has loaded or rendered, call preloadWeak().
+// This will attempt to hoist and return the inner component,
+// but only if it can be loaded synchronously, otherwise null will be returned.
+const InnerComponent = MyUniversalComponent.preloadWeak()
+if (InnerComponent) {
+    InnerComponent.doSomething()
+}
 ```
 > NOTE: for imports using dynamic expressions, conflicting methods will be overwritten by the current component
+
+> NOTE: preloadWeak() will not cause network requests, which means that if the component has not loaded, it will return null. Use it only when you need to retrieve and hoist the wrapped component before rendering. Calling preloadWeak() on your server will ensure that all statics are hoisted properly.
 
 ## Props API
 
