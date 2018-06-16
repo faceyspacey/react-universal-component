@@ -41,7 +41,7 @@ export default function requireUniversalModule<Props: Props>(
     isDynamic,
     modCache,
     promCache,
-    usesBablePlugin
+    usesBabelPlugin
   } = options
 
   const config = getConfig(isDynamic, universalConfig, options, props)
@@ -138,7 +138,7 @@ export default function requireUniversalModule<Props: Props>(
     if (isServer || isTest) {
       if (chunkName) {
         let name = callForString(chunkName, props)
-        if (usesBablePlugin) {
+        if (usesBabelPlugin) {
           name = name.replace(/\//g, '-')
         }
         if (name) CHUNK_NAMES.add(name)
