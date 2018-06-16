@@ -5,11 +5,28 @@
   "main": "dist/index.js",
   "typings": "index.d.ts",
   "author": "James FaceySpacey Gillmore <james@faceyspacey.com> (http://www.faceyspacey.com)",
+  "contributors": [
+    "Zack Jackson <zackary.l.jackson@gmail.com> (https://github.com/ScriptedAlchemy)"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/faceyspacey/react-universal-component/issues"
   },
   "homepage": "https://github.com/faceyspacey/react-universal-component#readme",
+  "keywords": [
+    "universal",
+    "ruc",
+    "unviersal react",
+    "ssr",
+    "code splitting",
+    "aggressive code splitting",
+    "lodable",
+    "react",
+    "async component",
+    "universal react",
+    "async rendering",
+    "webpack 4"
+  ],
   "scripts": {
     "build": "babel src -d dist",
     "flow-copy": "flow-copy-source src dist",
