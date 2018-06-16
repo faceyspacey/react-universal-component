@@ -40,7 +40,8 @@ export default function requireUniversalModule<Props: Props>(
     onError,
     isDynamic,
     modCache,
-    promCache
+    promCache,
+    usesBablePlugin
   } = options
 
   const config = getConfig(isDynamic, universalConfig, options, props)
@@ -136,7 +137,10 @@ export default function requireUniversalModule<Props: Props>(
   const addModule = (props: Object): ?string => {
     if (isServer || isTest) {
       if (chunkName) {
-        const name = callForString(chunkName, props)
+        let name = callForString(chunkName, props)
+        if (usesBablePlugin) {
+          name = name.replace(/\//g, '-')
+        }
         if (name) CHUNK_NAMES.add(name)
         if (!isTest) return name // makes tests way smaller to run both kinds
       }
