@@ -44,7 +44,7 @@ export default function universal<Props: Props>(
 
   const isDynamic = hasBabelPlugin || testBabelPlugin
   options.isDynamic = isDynamic
-  options.usesBablePlugin = hasBabelPlugin
+  options.usesBabelPlugin = hasBabelPlugin
   options.modCache = {}
   options.promCache = {}
 
