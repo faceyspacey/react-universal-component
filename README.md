@@ -41,12 +41,33 @@
 </p>
 
 <p align="center">
-🍾🍾🍾 <a href="https://github.com/faceyspacey/universal-demo">GIT CLONE 2.0 LOCAL DEMO</a> 🚀🚀🚀
+🍾🍾🍾 <a href="https://github.com/faceyspacey/universal-demo">GIT CLONE 3.0 LOCAL DEMO</a> 🚀🚀🚀
 </p>
 
-For "power users" the SPA is dead. If you're not universally rendering on the server you're doing it "wrong." You're losing money for you, your clients, your employers. All hail the Google god.
+- [React Universal Component](#react-universal-component)
+  * [Intro](#intro)
+  * [What makes Universal Rendering so painful](#what-makes-universal-rendering-so-painful)
+  * [Installation](#installation)
+  * [Other Packages You Will Need or Want](#other-packages-you-will-need-or-want)
+  * [API and Options](#api-and-options)
+  * [Flushing for SSR](#flushing-for-ssr)
+  * [Preload](#preload)
+  * [Static Hoisting](#static-hoisting)
+  * [Props API](#props-api)
+  * [Usage with CSS-in-JS libraries](#usage-with-css-in-js-libraries)
+  * [Usage with two-stage rendering](#usage-with-two-stage-rendering)
+  * [Universal Demo](#universal-demo)
+  * [Contributing](#contributing)
+  * [Tests](#tests)
+  * [More from FaceySpacey](#more-from-faceyspacey-in-reactlandia)
 
-The real problem has been **simultaneous SSR + Splitting**. If you've ever attempted such, *you know*. This is a one-of-a-kind solution that brings it all together.
+
+## Intro
+  
+For "power users" the traditional SPA is dead. If you're not universally rendering on the server, you're at risk of choking search engine visibility. As it stands, SEO and client-side rendering are not a match for SSR. Even though many search engines claim better SPA indexing, there are many caveats. **Server-side rendering matters: [JavaScript & SEO Backfire – A Hulu.com Case Study](https://www.elephate.com/blog/javascript-seo-backfire-hulu-com-case-study/)**
+
+
+The real problem has been **simultaneous SSR + Splitting**. If you've ever attempted such, *you know*. Here is a one-of-a-kind solution that brings it all together.
 
 *This is the final universal component for React you'll ever need, and it looks like this:*
 
@@ -63,22 +84,19 @@ export default () =>
 
 It's made possible by our [PR to webpack](https://github.com/webpack/webpack/pull/5235) which built support for ```require.resolveWeak(`'./${page}`)```. Before it couldn't be dynamic--i.e. it supported one module, not a folder of modules.
 
-You no longer need to create a hash of all your universal or loadable components. You can frictionlessly support multiple components in one HoC as if imports weren't static. This seamingly small thing--we predict--will lead to universal rendering finally becoming commonplace. It's what a universal component for React is supposed to be.
+Dont forget to check out  [webpack-flush-chunks](https://github.com/faceyspacey/webpack-flush-chunks) - it provides the server with info about the render so it can deliver the right assets from the start. No additional async imports on first load. [It reduces time to interactive](https://developers.google.com/web/tools/lighthouse/audits/time-to-interactive)
 
-Of course, you also need [webpack-flush-chunks](https://github.com/faceyspacey/webpack-flush-chunks) to bring this together server-side. Ultimately that's the real foundation here and the most challenging part. Packages in the past like *React Loadable* did not address this aspect. They excelled at the SPA. In terms of universal rendering, they got you maybe 15% of the way by providing the module IDs rendered. There's a lot more than that.
+> DEFINITION: "Universal Rendering" is *simultaneous* SSR + Splitting, not trading one for the other.
+
+
+<details> <summary> Read more about Chunk Flushing</summary>
+
+Gone are the days of holding onto file hashes, manual loading conventions, and elaborate lookups on the server or client. You can frictionlessly support multiple components in one HoC as if imports weren't static. This seemingly small thing--we predict--will lead to universal rendering finally becoming commonplace. It's what a universal component for React is supposed to be.
+
+[webpack-flush-chunks](https://github.com/faceyspacey/webpack-flush-chunks) brings it together server-side Ultimately that's the real foundation here and the most challenging part. Packages in the past like *React Loadable* did not address this aspect. They excelled at the SPA. In terms of universal rendering, but stumbled on provisioning whats required beyond the scope of knowing the module IDs that were rendered. There are a few extras to take into account.
 
 **Webpack Flush Chunks** ensures you serve all the chunks rendered on the server to the client in style. To be clear, it's been impossible until now. This is the first general solution to do it, and still the only one. You *must* use it in combination with React Universal Component to fulfill the universal code splitting dream.
-
-In the future both packages will be distilled into one product called `universal-render`--or ***"Universal"*** for short. The transition will be seamless. We're making this space as easy as possible for "power users" like yourself that prefer the *frameworkless* approach over the constraints of a framework like Next.js.
-
-> DEFINITION: "Universal Rendering" is *simutlaneous* SSR + Splitting, not trading one for the other.
-
-## I didn't know Universal Rendering was such a pain...
-That's probably because you were trapped in SPA land. If you didn't know how much of a pain in the ass *universal rendering* has been, check this quote from the React Router docs:
-
-![require-universal-component react-router quote](./react-router-quote.png)
-
-> If you were already in the know, you're probably one of our first users, and we thank you for your support and feeling the essence of our mission. Thank god this is over!
+</details>
 
 
 ## Installation
@@ -105,7 +123,7 @@ That's probably because you were trapped in SPA land. If you didn't know how muc
 
 - [webpack-import-will-soon-fetch-js-and-css-heres-how-you-do-it-today](https://medium.com/faceyspacey/webpacks-import-will-soon-fetch-js-css-here-s-how-you-do-it-today-4eb5b4929852)
 
-## Other Packages You Will Need/Want
+## Other Packages You Will Need or Want
 
 To be clear, you can get started with just the simple `HoC` shown at the top of the page, but to accomplish universal rendering, you will need to follow the directions in the *webpack-flush-chunks* package:
 
@@ -115,7 +133,7 @@ And if you want CSS chunks *(which we highly recommend)*, you will need:
 - [extract-css-chunks-webpack-plugin](https://github.com/faceyspacey/extract-css-chunks-webpack-plugin)
 
 
-## API + Options
+## API and Options
 
 
 ```js
@@ -173,6 +191,13 @@ onLoad: (module, info, props, context) => {
 
 - `loadingTransition` when set to `false` allows you to keep showing the current component when the `loading` component would otherwise show during transitions from one component to the next.
 
+## What makes Universal Rendering so painful
+
+One wouldn't expect it to be. Sadly the SSR part of react hasn't been as innovative as the CSR side.
+
+If you didn't know how much of a pain in the ass *universal rendering* has been, check this quote from the **React Router** docs:
+
+![require-universal-component react-router quote](./react-router-quote.png)
 
 ## Flushing for SSR
 

@@ -37,7 +37,8 @@ export type ModuleOptions = {
   isDynamic: boolean,
   modCache: Object,
   promCache: Object,
-  id?: string
+  id?: string,
+  usesBabelPlugin?: boolean
 }
 
 export type ComponentOptions = {
