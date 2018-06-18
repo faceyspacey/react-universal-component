@@ -124,7 +124,6 @@ universal(asyncComponent, options)
 
 **asyncComponent:**
 - ```props => import(`./${props.page}`)```
-- `import('./Foo')` *// doesn't need to be wrapped in a function when using the babel plugin!*
 - `(props, cb) => require.ensure([], require => cb(null, require('./Foo')))`
 
 The first argument can be a function that returns a promise, a promise itself, or a function that takes a node-style callback. The most powerful and popular is a function that takes props as an argument.
@@ -240,7 +239,7 @@ You can preload the async component if there's a likelihood it will show soon:
 ```js
 import universal from 'react-universal-component'
 
-const UniversalComponent = universal(import('./Foo'))
+const UniversalComponent = universal(() => import('./Foo'))
 
 export default class MyComponent extends React.Component {
   componentWillMount() {
@@ -267,7 +266,7 @@ export default class MyComponent extends React.Component {
 Then this will work:
 
 ```js
-const MyUniversalComponent = universal(import('./MyComponent'))
+const MyUniversalComponent = universal(() => import('./MyComponent'))
 
 // render it
 <MyUniversalComponent />
@@ -301,7 +300,7 @@ You can pass `isLoading` and `error` props to the resulting component returned f
 Here's an example using Apollo:
 
 ```js
-const UniversalUser = universal(import('./User'))
+const UniversalUser = universal(() => import('./User'))
 
 const User = ({ loading, error, user }) =>
   <div>
