@@ -1,6 +1,7 @@
 [ignore]
 .*/node_modules/config-chain/.*
 .*/node_modules/npmconf/.*
+.*/node_modules/chalk/.*
 
 [include]
 

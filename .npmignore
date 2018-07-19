@@ -19,3 +19,4 @@ webpack.config.js
 .flowconfig
 *.png
 yarn.lock
+.idea
