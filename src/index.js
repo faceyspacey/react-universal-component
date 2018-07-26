@@ -29,7 +29,7 @@ export const setHasBabelPlugin = () => {
 }
 
 export default function universal<Props: Props>(
-  component: Config | ConfigFunc,
+  asyncModule: Config | ConfigFunc,
   opts: ComponentOptions = {}
 ) {
   const {
@@ -52,7 +52,6 @@ export default function universal<Props: Props>(
     /* eslint-disable react/sort-comp */
     _mounted: boolean
     _asyncOnly: boolean
-    _component: ?Object
 
     state: State
     props: Props
@@ -61,11 +60,11 @@ export default function universal<Props: Props>(
 
     static preload(props: Props, context: Object = {}) {
       props = props || {}
-      const { requireAsync, requireSync } = req(component, options, props)
-      let Component
+      const { requireAsync, requireSync } = req(asyncModule, options, props)
+      let mod
 
       try {
-        Component = requireSync(props, context)
+        mod = requireSync(props, context)
       }
       catch (error) {
         return Promise.reject(error)
@@ -73,31 +72,31 @@ export default function universal<Props: Props>(
 
       return Promise.resolve()
         .then(() => {
-          if (Component) return Component
+          if (mod) return mod
           return requireAsync(props, context)
         })
-        .then(Component => {
-          hoist(UniversalComponent, Component, {
+        .then(mod => {
+          hoist(UniversalComponent, mod, {
             preload: true,
             preloadWeak: true
           })
-          return Component
+          return mod
         })
     }
 
     static preloadWeak(props: Props, context: Object = {}) {
       props = props || {}
-      const { requireSync } = req(component, options, props)
+      const { requireSync } = req(asyncModule, options, props)
 
-      const Component = requireSync(props, context)
-      if (Component) {
-        hoist(UniversalComponent, Component, {
+      const mod = requireSync(props, context)
+      if (mod) {
+        hoist(UniversalComponent, mod, {
           preload: true,
           preloadWeak: true
         })
       }
 
-      return Component
+      return mod
     }
 
     static contextTypes = {
@@ -114,15 +113,15 @@ export default function universal<Props: Props>(
       this._mounted = true
 
       const { addModule, requireSync, requireAsync, asyncOnly } = req(
-        component,
+        asyncModule,
         options,
         this.props
       )
 
-      let Component
+      let mod
 
       try {
-        Component = requireSync(this.props, this.context)
+        mod = requireSync(this.props, this.context)
       }
       catch (error) {
         return this.update({ error })
@@ -135,9 +134,9 @@ export default function universal<Props: Props>(
         this.context.report(chunkName)
       }
 
-      if (Component || isServer) {
+      if (mod || isServer) {
         this.handleBefore(true, true, isServer)
-        this.update({ Component }, true, true, isServer)
+        this.update({ mod }, true, true, isServer)
         return
       }
 
@@ -152,32 +151,32 @@ export default function universal<Props: Props>(
     componentWillReceiveProps(nextProps: Props) {
       if (isDynamic || this._asyncOnly) {
         const { requireSync, requireAsync, shouldUpdate } = req(
-          component,
+          asyncModule,
           options,
           nextProps,
           this.props
         )
 
         if (shouldUpdate(nextProps, this.props)) {
-          let Component
+          let mod
 
           try {
-            Component = requireSync(nextProps, this.context)
+            mod = requireSync(nextProps, this.context)
           }
           catch (error) {
             return this.update({ error })
           }
 
-          this.handleBefore(false, !!Component)
+          this.handleBefore(false, !!mod)
 
-          if (!Component) {
+          if (!mod) {
             return this.requireAsync(requireAsync, nextProps)
           }
 
-          const state = { Component }
+          const state = { mod }
 
           if (alwaysDelay) {
-            if (loadingTransition) this.update({ Component: null }) // display `loading` during componentWillReceiveProps
+            if (loadingTransition) this.update({ mod: null }) // display `loading` during componentWillReceiveProps
             setTimeout(() => this.update(state, false, true), minDelay)
             return
           }
@@ -185,23 +184,23 @@ export default function universal<Props: Props>(
           this.update(state, false, true)
         }
         else if (isHMR()) {
-          const Component = requireSync(nextProps, this.context)
-          this.setState({ Component: () => null }) // HMR /w Redux and HOCs can be finicky, so we
-          setTimeout(() => this.setState({ Component })) // toggle components to insure updates occur
+          const mod = requireSync(nextProps, this.context)
+          this.setState({ mod: () => null }) // HMR /w Redux and HOCs can be finicky, so we
+          setTimeout(() => this.setState({ mod })) // toggle components to insure updates occur
         }
       }
     }
 
     requireAsync(requireAsync: RequireAsync, props: Props, isMount?: boolean) {
-      if (this.state.Component && loadingTransition) {
-        this.update({ Component: null }) // display `loading` during componentWillReceiveProps
+      if (this.state.mod && loadingTransition) {
+        this.update({ mod: null }) // display `loading` during componentWillReceiveProps
       }
 
       const time = new Date()
 
       requireAsync(props, this.context)
-        .then((Component: ?any) => {
-          const state = { Component }
+        .then((mod: ?any) => {
+          const state = { mod }
 
           const timeLapsed = new Date() - time
           if (timeLapsed < minDelay) {
@@ -244,10 +243,10 @@ export default function universal<Props: Props>(
       isSync: boolean,
       isServer: boolean
     ) {
-      const { Component, error } = state
+      const { mod, error } = state
 
-      if (Component && !error) {
-        hoist(UniversalComponent, Component, {
+      if (mod && !error) {
+        hoist(UniversalComponent, mod, {
           preload: true,
           preloadWeak: true
         })
@@ -255,7 +254,7 @@ export default function universal<Props: Props>(
         if (this.props.onAfter) {
           const { onAfter } = this.props
           const info = { isMount, isSync, isServer }
-          onAfter(info, Component)
+          onAfter(info, mod)
         }
       }
       else if (error && this.props.onError) {
@@ -266,7 +265,7 @@ export default function universal<Props: Props>(
     }
 
     render() {
-      const { error, Component } = this.state
+      const { error, mod } = this.state
       const { isLoading, error: userError, ...props } = this.props
 
       // user-provided props (e.g. for data-fetching loading):
@@ -279,9 +278,9 @@ export default function universal<Props: Props>(
       else if (error) {
         return createElement(Err, { ...props, error })
       }
-      else if (Component) {
+      else if (mod) {
         // primary usage (for async import loading + errors):
-        return createElement(Component, props)
+        return createElement(mod, props)
       }
 
       return createElement(Loading, props)

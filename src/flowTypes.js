@@ -91,7 +91,7 @@ export type Tools = {
 export type Ids = Array<string>
 
 // RUC
-export type State = { error?: any, Component?: ?any }
+export type State = { error?: any, mod?: ?any }
 
 type Info = { isMount: boolean, isSync: boolean, isServer: boolean }
 type OnBefore = Info => void
