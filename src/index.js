@@ -33,6 +33,7 @@ export default function universal<Props: Props>(
   opts: ComponentOptions = {}
 ) {
   const {
+    render = null,
     loading: Loading = DefaultLoading,
     error: Err = DefaultError,
     minDelay = 0,
@@ -264,26 +265,30 @@ export default function universal<Props: Props>(
       this.setState(state)
     }
 
-    render() {
-      const { error, mod } = this.state
-      const { isLoading, error: userError, ...props } = this.props
+    renderDefault = (props: Props, state: State) => {
+      const { error, mod } = state
+      const { isLoading, error: userError, ...restProps } = props
 
       // user-provided props (e.g. for data-fetching loading):
       if (isLoading) {
-        return createElement(Loading, props)
+        return createElement(Loading, restProps)
       }
       else if (userError) {
-        return createElement(Err, { ...props, error: userError })
+        return createElement(Err, { ...restProps, error: userError })
       }
       else if (error) {
-        return createElement(Err, { ...props, error })
+        return createElement(Err, { ...restProps, error })
       }
       else if (mod) {
         // primary usage (for async import loading + errors):
-        return createElement(mod, props)
+        return createElement(mod, restProps)
       }
 
-      return createElement(Loading, props)
+      return createElement(Loading, restProps)
+    }
+
+    render() {
+      return (render || this.renderDefault)(this.props, this.state)
     }
   }
 }

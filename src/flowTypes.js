@@ -42,6 +42,7 @@ export type ModuleOptions = {
 }
 
 export type ComponentOptions = {
+  render?: (Props, State) => void,
   loading?: LoadingComponent,
   error?: ErrorComponent,
   minDelay?: number,
