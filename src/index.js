@@ -9,11 +9,16 @@ import type {
   ConfigFunc,
   ComponentOptions,
   RequireAsync,
-  Props,
-  State
+  State,
+  Props
 } from './flowTypes'
 
-import { DefaultLoading, DefaultError, isServer, createElement } from './utils'
+import {
+  DefaultLoading,
+  DefaultError,
+  createDefaultRender,
+  isServer
+} from './utils'
 
 export { CHUNK_NAMES, MODULE_IDS } from './requireUniversalModule'
 export { default as ReportChunks } from './report-chunks'
@@ -33,7 +38,7 @@ export default function universal<Props: Props>(
   opts: ComponentOptions = {}
 ) {
   const {
-    render = null,
+    render: userRender,
     loading: Loading = DefaultLoading,
     error: Err = DefaultError,
     minDelay = 0,
@@ -42,6 +47,8 @@ export default function universal<Props: Props>(
     loadingTransition = true,
     ...options
   } = opts
+
+  const render = userRender || createDefaultRender(Loading, Err)
 
   const isDynamic = hasBabelPlugin || testBabelPlugin
   options.isDynamic = isDynamic
@@ -265,30 +272,10 @@ export default function universal<Props: Props>(
       this.setState(state)
     }
 
-    renderDefault = (props: Props, state: State) => {
-      const { error, mod } = state
-      const { isLoading, error: userError, ...restProps } = props
-
-      // user-provided props (e.g. for data-fetching loading):
-      if (isLoading) {
-        return createElement(Loading, restProps)
-      }
-      else if (userError) {
-        return createElement(Err, { ...restProps, error: userError })
-      }
-      else if (error) {
-        return createElement(Err, { ...restProps, error })
-      }
-      else if (mod) {
-        // primary usage (for async import loading + errors):
-        return createElement(mod, restProps)
-      }
-
-      return createElement(Loading, restProps)
-    }
-
     render() {
-      return (render || this.renderDefault)(this.props, this.state)
+      const { isLoading, error: userError, ...props } = this.props
+      const { mod, error } = this.state
+      return render(props, mod, isLoading, userError || error)
     }
   }
 }

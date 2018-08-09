@@ -1,7 +1,16 @@
 // @flow
-import React from 'react'
+import * as React from 'react'
 
-import type { Id, Key, OnLoad, Mod, StrFun, ImportModule } from './flowTypes'
+import type {
+  Id,
+  Key,
+  Props,
+  LoadingComponent,
+  ErrorComponent,
+  OnLoad,
+  Mod,
+  StrFun
+} from './flowTypes'
 
 export const isTest = process.env.NODE_ENV === 'test'
 export const isServer = !(
@@ -14,9 +23,10 @@ export const isWebpack = () => typeof __webpack_require__ !== 'undefined'
 export const babelInterop = (mod: ?Mod) =>
   mod && typeof mod === 'object' && mod.__esModule ? mod.default : mod
 
-export const DefaultLoading = () => <div>Loading...</div>
-export const DefaultError = ({ error }: { error: Object }) =>
+export const DefaultLoading: LoadingComponent = () => <div>Loading...</div>
+export const DefaultError: ErrorComponent = ({ error }) => (
   <div>Error: {error && error.message}</div>
+)
 
 export const tryRequire = (id: Id): ?any => {
   try {
@@ -27,7 +37,9 @@ export const tryRequire = (id: Id): ?any => {
     // this can sometimes lead the server to render the loading component.
     if (process.env.NODE_ENV === 'development') {
       console.warn(
-        `chunk not available for synchronous require yet: ${id}: ${err.message}`,
+        `chunk not available for synchronous require yet: ${id}: ${
+          err.message
+        }`,
         err.stack
       )
     }
@@ -76,9 +88,29 @@ export const findExport = (mod: ?Mod, key?: Key): ?any => {
 }
 
 export const createElement = (Component: any, props: {}) =>
-  React.isValidElement(Component)
-    ? React.cloneElement(Component, props)
-    : <Component {...props} />
+  React.isValidElement(Component) ? (
+    React.cloneElement(Component, props)
+  ) : (
+    <Component {...props} />
+  )
+
+export const createDefaultRender = (
+  Loading: LoadingComponent,
+  Err: ErrorComponent
+) => (props: Props, mod: ?any, isLoading: ?boolean, error: ?Error) => {
+  if (isLoading) {
+    return createElement(Loading, props)
+  }
+  else if (error) {
+    return createElement(Err, { ...props, error })
+  }
+  else if (mod) {
+    // primary usage (for async import loading + errors):
+    return createElement(mod, props)
+  }
+
+  return createElement(Loading, props)
+}
 
 export const callForString = (strFun: StrFun, props: Object) =>
   typeof strFun === 'function' ? strFun(props) : strFun
