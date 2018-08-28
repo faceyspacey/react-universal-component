@@ -43,6 +43,7 @@ export type ModuleOptions = {
 }
 
 export type ComponentOptions = {
+  render?: (Props, mod: ?any, isLoading: ?boolean, error: ?Error) => void,
   loading?: LoadingComponent,
   error?: ErrorComponent,
   minDelay?: number,
@@ -92,7 +93,7 @@ export type Tools = {
 export type Ids = Array<string>
 
 // RUC
-export type State = { error?: any, Component?: ?any }
+export type State = { error?: any, mod?: ?any }
 
 type Info = { isMount: boolean, isSync: boolean, isServer: boolean }
 type OnBefore = Info => void
@@ -107,13 +108,14 @@ export type Props = {
   onError?: OnErrorProp
 }
 
-export type GenericComponent<Props> =
+export type GenericComponent<Props> = Props =>
+  | React$Element<any>
   | Class<React.Component<{}, Props, mixed>>
   | React$Element<any>
 
 export type Component<Props> = GenericComponent<Props>
 export type LoadingComponent = GenericComponent<{}>
-export type ErrorComponent = GenericComponent<{}>
+export type ErrorComponent = GenericComponent<{ error: Error }>
 
 // babel-plugin-universal-import
 export type ImportModule =
