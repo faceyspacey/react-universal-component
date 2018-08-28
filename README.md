@@ -54,6 +54,7 @@
   * [Preload](#preload)
   * [Static Hoisting](#static-hoisting)
   * [Props API](#props-api)
+  * [Custom Rendering](#custom-rendering)
   * [Usage with CSS-in-JS libraries](#usage-with-css-in-js-libraries)
   * [Usage with two-stage rendering](#usage-with-two-stage-rendering)
   * [Universal Demo](#universal-demo)
@@ -63,7 +64,7 @@
 
 
 ## Intro
-  
+
 For "power users" the traditional SPA is dead. If you're not universally rendering on the server, you're at risk of choking search engine visibility. As it stands, SEO and client-side rendering are not a match for SSR. Even though many search engines claim better SPA indexing, there are many caveats. **Server-side rendering matters: [JavaScript & SEO Backfire – A Hulu.com Case Study](https://www.elephate.com/blog/javascript-seo-backfire-hulu-com-case-study/)**
 
 
@@ -158,7 +159,15 @@ The first argument can be a function that returns a promise, a promise itself, o
 - `minDelay`: `0` -- *default*
 - `alwaysDelay`: `false` -- *default*
 - `loadingTransition`: `true` -- *default*
-
+- `render`: `(props, module, isLoading, error) => <CustomComponent />` -- *default*: the default rendering logic is roughly equivalent to the following.
+  ```js
+  render: (props, Mod, isLoading, error) => {
+    if (isLoading) return <Loading {...props} />
+    else if (error) return <Err {...props} error={error} />
+    else if (Mod) return <Mod {...props} />
+    return <Loading {...props} />
+  }
+  ```
 
 **In Depth:**
 > All components can be classes/functions or elements (e.g: `Loading` or `<Loading />`)
@@ -175,21 +184,23 @@ The first argument can be a function that returns a promise, a promise itself, o
 - `onError` is a callback called if async imports fail. It does not apply to sync requires.
 
 - `onLoad` is a callback function that receives the *entire* module. It allows you to export and put to use things other than your `default` component export, like reducers, sagas, etc. E.g:
-```js
-onLoad: (module, info, props, context) => {
-  context.store.replaceReducer({ ...otherReducers, foo: module.fooReducer })
+  ```js
+  onLoad: (module, info, props, context) => {
+    context.store.replaceReducer({ ...otherReducers, foo: module.fooReducer })
 
-  // if a route triggered component change, new reducers needs to reflect it
-  context.store.dispatch({ type: 'INIT_ACTION_FOR_ROUTE', payload: { param: props.param } })
-}
-````
-- `onLoad` *(continued)* - **As you can see we have thought of everything you might need to really do code-splitting right (we have real apps that use this stuff).** `onLoad` is fired directly before the component is rendered so you can setup any reducers/etc it depends on. Unlike the `onAfter` prop, this *option* to the `universal` *HOC* is only fired the first time the module is received. *Also note*: it will fire on the server, so do `if (!isServer)` if you have to. But also keep in mind you will need to do things like replace reducers on both the server + client for the imported component that uses new reducers to render identically in both places.
+    // if a route triggered component change, new reducers needs to reflect it
+    context.store.dispatch({ type: 'INIT_ACTION_FOR_ROUTE', payload: { param: props.param } })
+  }
+  ````
+  **As you can see we have thought of everything you might need to really do code-splitting right (we have real apps that use this stuff).** `onLoad` is fired directly before the component is rendered so you can setup any reducers/etc it depends on. Unlike the `onAfter` prop, this *option* to the `universal` *HOC* is only fired the first time the module is received. *Also note*: it will fire on the server, so do `if (!isServer)` if you have to. But also keep in mind you will need to do things like replace reducers on both the server + client for the imported component that uses new reducers to render identically in both places.
 
 - `minDelay` is essentially the minimum amount of time the `loading` component will always show for. It's good for enforcing silky smooth animations, such as during a 500ms sliding transition. It insures the re-render won't happen until the animation is complete. It's often a good idea to set this to something like 300ms even if you don't have a transition, just so the loading spinner shows for an appropriate amount of time without jank.
 
 - `alwaysDelay` is a boolean you can set to true (*default: false*) to guarantee the `minDelay` is always used (i.e. even when components cached from previous imports and therefore synchronously and instantly required). This can be useful for guaranteeing animations operate as you want without having to wire up other components to perform the task. *Note: this only applies to the client when your `UniversalComponent` uses dynamic expressions to switch between multiple components.*
 
 - `loadingTransition` when set to `false` allows you to keep showing the current component when the `loading` component would otherwise show during transitions from one component to the next.
+
+- `render` overrides the default rendering logic. This option enables some interesting and useful usage of this library. Please refer to the [Custom Rendering](#custom-rendering) section.
 
 ## What makes Universal Rendering so painful
 
@@ -386,11 +397,47 @@ const MyComponent = ({ dispatch, isLoading }) =>
 
 **The reality is just having the `<UniversalComponent />` as the only placeholder where you can show loading and error information is very limiting and not good enough for real apps. Hence these props.**
 
+## Custom Rendering
+
+This library supports custom rendering so that you can define rendering logic that best suits your own need. This feature has also enabled some interesting and useful usage of this library.
+
+For example, in some static site generation setup, data are loaded as JavaScript modules, instead of being fetched from an API. In this case, the async component that you are loading is not a React component, but an JavaScript object. To better illustrate this use case, suppose that there are some data modules `pageData1.js`, `pageData2.js`, ... in the `src/data` folder. Each of them corresponds to a page.
+```js
+// src/data/pageDataX.js
+export default { title: 'foo', content: 'bar' }
+```
+
+All of the `pageDataX.js` files will be rendered with the `<Page />` component below. You wouldn't want to create `Page1.jsx`, `Page2.jsx`, ... just to support the async loading of each data item. Instead, you can just define a single `Page` component as follows.
+```js
+const Page = ({ title, content }) => <div>{title}<br />{content}</div>
+```
+
+And define your custom rendering logic.
+```js
+// src/components/AsyncPage.jsx
+import universal from 'react-universal-component'
+
+const AsyncPage = universal(props => import(`../data/${props.pageDataId}`), {
+  render: (props, mod) => <Page {...props} title={mod.title} content={mod.content} />
+})
+
+export default AsyncPage
+```
+
+Now, with a `pageId` props provided by your router, or whatever data sources, you can load your data synchronsouly on the server side (and on the client side for the initial render), and asynchronously on the client side for the subsequent render.
+```js
+// Usage
+const BlogPost = (props) =>
+  <div>
+    <UniversalComponent pageDataId={props.pageId} />
+  </div>
+```
+
 ## Usage with CSS-in-JS libraries
 
 flushChunkNames relies on renderToString's synchronous execution to keep track of dynamic chunks. This is the same strategy used by CSS-in-JS frameworks to extract critical CSS for first render.
 
-To use these together, simply wrap the CSS library's callback with clearChunks() and flushChunkNames():
+To use these together, simply wrap the CSS library's callback with `clearChunks()` and `flushChunkNames()`:
 
 ### Example with Aphrodite
 
