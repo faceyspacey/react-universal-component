@@ -2,6 +2,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import hoist from 'hoist-non-react-statics'
+import { Context } from 'vm'
 import req from './requireUniversalModule'
 
 import type {
@@ -58,7 +59,7 @@ export default function universal<Props: Props>(
 
   return class UniversalComponent extends React.Component<void, Props, *> {
     /* eslint-disable react/sort-comp */
-    _mounted: boolean
+    _initialized: boolean
     _asyncOnly: boolean
 
     state: State
@@ -112,103 +113,159 @@ export default function universal<Props: Props>(
       report: PropTypes.func
     }
 
+    static handleBeforeStatic = (
+      isMount: boolean,
+      isSync: boolean,
+      isServer?: boolean = false
+    ) => constructor.handleBefore
+
+    static requireAsyncStatic = (
+      requireAsync: RequireAsync,
+      props: Props,
+      state: State,
+      context: Context,
+      isMount?: boolean
+    ) => constructor.requireAsyncInner
+
     constructor(props: Props, context: {}) {
       super(props, context)
-      this.state = { error: null }
+      this.state = this.init(this.props, this.context)
     }
 
-    componentWillMount() {
-      this._mounted = true
+    static getDerivedStateFromProps(nextProps, currentState) {
+      const { props: prevProps, context, mod: prevMod } = currentState
+
+      let mod = prevMod
+
+      if (prevProps && (isDynamic || currentState.asyncOnly)) {
+        const { requireSync, requireAsync, shouldUpdate } = req(
+          asyncModule,
+          options,
+          nextProps,
+          prevProps
+        )
+
+        if (shouldUpdate(nextProps, prevProps)) {
+          try {
+            mod = requireSync(nextProps, context)
+          }
+          catch (error) {
+            return { props: nextProps, context, mod, error }
+          }
+
+          UniversalComponent.handleBeforeStatic(false, !!mod)
+
+          if (!mod) {
+            UniversalComponent.requireAsyncStatic(
+              requireAsync,
+              nextProps,
+              { props: nextProps, context },
+              context
+            )
+            return { props: nextProps, context }
+          }
+          let nextState
+          // TODO: раскомментировать и реализовать
+          if (alwaysDelay) {
+            if (loadingTransition) {
+              return this.__update({ mod: null, props: nextProps, context })
+            } // display `loading` during componentWillReceiveProps
+
+            const getNewState = () =>
+              UniversalComponent.__update(
+                { mod, props: nextProps, context },
+                false,
+                true
+              )
+            setTimeout(() => (nextState = getNewState()), minDelay)
+            return nextState
+          }
+
+          nextState = UniversalComponent.__update(
+            { mod, props: nextProps, context },
+            false,
+            true
+          )
+          return nextState
+        }
+        else if (isHMR()) {
+          mod = requireSync(nextProps, context)
+        }
+      }
+      return {
+        props: nextProps,
+        mod,
+        context
+        // context: UniversalComponent.context
+      }
+    }
+
+    init(props, context) {
+      this._initialized = true
 
       const { addModule, requireSync, requireAsync, asyncOnly } = req(
         asyncModule,
         options,
-        this.props
+        props
       )
 
       let mod
 
       try {
-        mod = requireSync(this.props, this.context)
+        mod = requireSync(props, context)
       }
       catch (error) {
-        return this.update({ error })
+        return this.__update({ error, props, context })
       }
 
       this._asyncOnly = asyncOnly
-      const chunkName = addModule(this.props) // record the module for SSR flushing :)
+      const chunkName = addModule(props) // record the module for SSR flushing :)
 
-      if (this.context.report) {
-        this.context.report(chunkName)
+      if (context.report) {
+        context.report(chunkName)
       }
 
       if (mod || isServer) {
         this.handleBefore(true, true, isServer)
-        this.update({ mod }, true, true, isServer)
-        return
+        return this.__update(
+          { asyncOnly, props, mod, context },
+          true,
+          true,
+          isServer
+        )
       }
 
       this.handleBefore(true, false)
-      this.requireAsync(requireAsync, this.props, true)
+      this.requireAsyncInner(
+        requireAsync,
+        props,
+        { props, asyncOnly, mod, context },
+        context,
+        true
+      )
+      return { mod, asyncOnly, context, props }
     }
 
     componentWillUnmount() {
-      this._mounted = false
+      this._initialized = false
     }
 
-    componentWillReceiveProps(nextProps: Props) {
-      if (isDynamic || this._asyncOnly) {
-        const { requireSync, requireAsync, shouldUpdate } = req(
-          asyncModule,
-          options,
-          nextProps,
-          this.props
-        )
-
-        if (shouldUpdate(nextProps, this.props)) {
-          let mod
-
-          try {
-            mod = requireSync(nextProps, this.context)
-          }
-          catch (error) {
-            return this.update({ error })
-          }
-
-          this.handleBefore(false, !!mod)
-
-          if (!mod) {
-            return this.requireAsync(requireAsync, nextProps)
-          }
-
-          const state = { mod }
-
-          if (alwaysDelay) {
-            if (loadingTransition) this.update({ mod: null }) // display `loading` during componentWillReceiveProps
-            setTimeout(() => this.update(state, false, true), minDelay)
-            return
-          }
-
-          this.update(state, false, true)
-        }
-        else if (isHMR()) {
-          const mod = requireSync(nextProps, this.context)
-          this.setState({ mod: () => null }) // HMR /w Redux and HOCs can be finicky, so we
-          setTimeout(() => this.setState({ mod })) // toggle components to insure updates occur
-        }
-      }
-    }
-
-    requireAsync(requireAsync: RequireAsync, props: Props, isMount?: boolean) {
-      if (this.state.mod && loadingTransition) {
-        this.update({ mod: null }) // display `loading` during componentWillReceiveProps
+    requireAsyncInner(
+      requireAsync: RequireAsync,
+      props: Props,
+      state: State,
+      context: Context,
+      isMount?: boolean
+    ) {
+      if (state.mod && loadingTransition) {
+        this.update({ mod: null, props }) // display `loading` during componentWillReceiveProps
       }
 
       const time = new Date()
 
-      requireAsync(props, this.context)
+      requireAsync(props, context)
         .then((mod: ?any) => {
-          const state = { mod }
+          const state = { mod, props, context }
 
           const timeLapsed = new Date() - time
           if (timeLapsed < minDelay) {
@@ -218,7 +275,49 @@ export default function universal<Props: Props>(
 
           this.update(state, isMount)
         })
-        .catch(error => this.update({ error }))
+        .catch(error => this.update({ error, props, context }))
+    }
+
+    __update = (
+      state: State,
+      isMount?: boolean = false,
+      isSync?: boolean = false,
+      isServer?: boolean = false
+    ) => {
+      if (!this._initialized) return state
+      if (!state.error) {
+        state.error = null
+        return state
+      }
+
+      return this.__handleAfter(state, isMount, isSync, isServer)
+    }
+
+    __handleAfter(
+      state: State,
+      isMount: boolean,
+      isSync: boolean,
+      isServer: boolean
+    ) {
+      const { mod, error } = state
+
+      if (mod && !error) {
+        hoist(UniversalComponent, mod, {
+          preload: true,
+          preloadWeak: true
+        })
+
+        if (this.props.onAfter) {
+          const { onAfter } = this.props
+          const info = { isMount, isSync, isServer }
+          onAfter(info, mod)
+        }
+      }
+      else if (error && this.props.onError) {
+        this.props.onError(error)
+      }
+
+      return state
     }
 
     update = (
@@ -227,7 +326,7 @@ export default function universal<Props: Props>(
       isSync?: boolean = false,
       isServer?: boolean = false
     ) => {
-      if (!this._mounted) return
+      if (!this._initialized) return
       if (!state.error) state.error = null
 
       this.handleAfter(state, isMount, isSync, isServer)
