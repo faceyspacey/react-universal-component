@@ -198,10 +198,3 @@ declare module 'react-universal-component' {
     options?: Options<P, C, Export>
   ): UniversalComponent<P>;
 }
-
-declare module 'react-universal-component/server' {
-  const clearChunks: () => void;
-  const flushChunkNames: () => string[];
-
-  export { clearChunks, flushChunkNames };
-}
