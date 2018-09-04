@@ -117,7 +117,7 @@ export default function universal<Props: Props>(
       this.state = { error: null }
     }
 
-    componentWillMount() {
+    componentDidMount() {
       this._mounted = true
 
       const { addModule, requireSync, requireAsync, asyncOnly } = req(
@@ -156,20 +156,20 @@ export default function universal<Props: Props>(
       this._mounted = false
     }
 
-    componentWillReceiveProps(nextProps: Props) {
+    componentDidUpdate(prevProps, prevState, snapshot) {
       if (isDynamic || this._asyncOnly) {
         const { requireSync, requireAsync, shouldUpdate } = req(
           asyncModule,
           options,
-          nextProps,
-          this.props
+          this.props,
+          prevProps
         )
 
-        if (shouldUpdate(nextProps, this.props)) {
+        if (shouldUpdate(this.props, prevProps)) {
           let mod
 
           try {
-            mod = requireSync(nextProps, this.context)
+            mod = requireSync(this.props, this.context)
           }
           catch (error) {
             return this.update({ error })
@@ -178,7 +178,7 @@ export default function universal<Props: Props>(
           this.handleBefore(false, !!mod)
 
           if (!mod) {
-            return this.requireAsync(requireAsync, nextProps)
+            return this.requireAsync(requireAsync, this.props)
           }
 
           const state = { mod }
@@ -192,8 +192,7 @@ export default function universal<Props: Props>(
           this.update(state, false, true)
         }
         else if (isHMR()) {
-          const mod = requireSync(nextProps, this.context)
-          this.setState({ mod: () => null }) // HMR /w Redux and HOCs can be finicky, so we
+          const mod = requireSync(this.props, this.context)
           setTimeout(() => this.setState({ mod })) // toggle components to insure updates occur
         }
       }
