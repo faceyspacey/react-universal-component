@@ -5024,6 +5024,7 @@ rc@^1.1.7:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
+<<<<<<< HEAD
 react-hot-loader@^4.3.6:
   version "4.3.6"
   resolved "http://0.0.0.0:4873/react-hot-loader/-/react-hot-loader-4.3.6.tgz#26e1491f08daf2bad99d141b1927c9faadef2fb4"
@@ -5035,14 +5036,19 @@ react-hot-loader@^4.3.6:
     react-lifecycles-compat "^3.0.4"
     shallowequal "^1.0.2"
 
+=======
+>>>>>>> 8a3bd2b7f1685c04fb5057571f3b3cfa83f3f185
 react-is@^16.4.2:
   version "16.4.2"
   resolved "http://0.0.0.0:4873/react-is/-/react-is-16.4.2.tgz#84891b56c2b6d9efdee577cc83501dfc5ecead88"
 
+<<<<<<< HEAD
 react-lifecycles-compat@^3.0.4:
   version "3.0.4"
   resolved "http://0.0.0.0:4873/react-lifecycles-compat/-/react-lifecycles-compat-3.0.4.tgz#4f1a273afdfc8f3488a8c516bfda78f872352362"
 
+=======
+>>>>>>> 8a3bd2b7f1685c04fb5057571f3b3cfa83f3f185
 react-test-renderer@^16.4.2:
   version "16.4.2"
   resolved "http://0.0.0.0:4873/react-test-renderer/-/react-test-renderer-16.4.2.tgz#4e03eca9359bb3210d4373f7547d1364218ef74e"
