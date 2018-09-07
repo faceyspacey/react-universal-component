@@ -132,74 +132,6 @@ export default function universal<Props: Props>(
       this.state = this.init(this.props, this.context)
     }
 
-    static getDerivedStateFromProps(nextProps, currentState) {
-      const { props: prevProps, context, mod: prevMod } = currentState
-
-      let mod = prevMod
-
-      if (prevProps && (isDynamic || currentState.asyncOnly)) {
-        const { requireSync, requireAsync, shouldUpdate } = req(
-          asyncModule,
-          options,
-          nextProps,
-          prevProps
-        )
-
-        if (shouldUpdate(nextProps, prevProps)) {
-          try {
-            mod = requireSync(nextProps, context)
-          }
-          catch (error) {
-            return { props: nextProps, context, mod, error }
-          }
-
-          UniversalComponent.handleBeforeStatic(false, !!mod)
-
-          if (!mod) {
-            UniversalComponent.requireAsyncStatic(
-              requireAsync,
-              nextProps,
-              { props: nextProps, context },
-              context
-            )
-            return { props: nextProps, context }
-          }
-          let nextState
-          // TODO: раскомментировать и реализовать
-          if (alwaysDelay) {
-            if (loadingTransition) {
-              return this.__update({ mod: null, props: nextProps, context })
-            } // display `loading` during componentWillReceiveProps
-
-            const getNewState = () =>
-              UniversalComponent.__update(
-                { mod, props: nextProps, context },
-                false,
-                true
-              )
-            setTimeout(() => (nextState = getNewState()), minDelay)
-            return nextState
-          }
-
-          nextState = UniversalComponent.__update(
-            { mod, props: nextProps, context },
-            false,
-            true
-          )
-          return nextState
-        }
-        else if (isHMR()) {
-          mod = requireSync(nextProps, context)
-        }
-      }
-      return {
-        props: nextProps,
-        mod,
-        context
-        // context: UniversalComponent.context
-      }
-    }
-
     init(props, context) {
       this._initialized = true
 
@@ -246,6 +178,50 @@ export default function universal<Props: Props>(
       return { mod, asyncOnly, context, props }
     }
 
+    componentDidUpdate(prevProps, prevState, snapshot) {
+      if (isDynamic || this._asyncOnly) {
+        const { requireSync, requireAsync, shouldUpdate } = req(
+          asyncModule,
+          options,
+          this.props,
+          prevProps
+        )
+
+        if (shouldUpdate(this.props, prevProps)) {
+          let mod
+
+          try {
+            mod = requireSync(this.props, this.context)
+          }
+          catch (error) {
+            return this.update({ error })
+          }
+
+          this.handleBefore(false, !!mod)
+
+          if (!mod) {
+            return this.requireAsyncInner(requireAsync, this.props, { mod })
+          }
+
+          const state = { mod }
+
+          if (alwaysDelay) {
+            if (loadingTransition) this.update({ mod: null }) // display `loading` during componentWillReceiveProps
+            setTimeout(() => this.update(state, false, true), minDelay)
+            return
+          }
+
+          this.update(state, false, true)
+        }
+        else if (isHMR()) {
+          const mod = requireSync(this.props, this.context)
+          // this.setState({ mod: () => null }) // HMR /w Redux and HOCs can be finicky, so we
+          // setTimeout(() => this.setState({ mod })) // toggle components to insure updates occur
+          this.update({ mod })
+        }
+      }
+    }
+
     componentWillUnmount() {
       this._initialized = false
     }
@@ -287,7 +263,7 @@ export default function universal<Props: Props>(
       if (!this._initialized) return state
       if (!state.error) {
         state.error = null
-        return state
+        // return state
       }
 
       return this.__handleAfter(state, isMount, isSync, isServer)
