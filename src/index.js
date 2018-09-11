@@ -113,20 +113,6 @@ export default function universal<Props: Props>(
       report: PropTypes.func
     }
 
-    static handleBeforeStatic = (
-      isMount: boolean,
-      isSync: boolean,
-      isServer?: boolean = false
-    ) => constructor.handleBefore
-
-    static requireAsyncStatic = (
-      requireAsync: RequireAsync,
-      props: Props,
-      state: State,
-      context: Context,
-      isMount?: boolean
-    ) => constructor.requireAsyncInner
-
     requireAsyncInner(
       requireAsync: RequireAsync,
       props: Props,
@@ -253,10 +239,11 @@ export default function universal<Props: Props>(
     constructor(props: Props, context: {}) {
       super(props, context)
       this.state = this.init(this.props, this.context)
+      this.state.error = null
     }
 
     static getDerivedStateFromProps(nextProps, currentState) {
-      const { requireSync, requireAsync, shouldUpdate } = req(
+      const { requireSync, shouldUpdate } = req(
         asyncModule,
         options,
         nextProps,
@@ -264,14 +251,16 @@ export default function universal<Props: Props>(
       )
       if (isHMR() && shouldUpdate(currentState.props, nextProps)) {
         const mod = requireSync(nextProps, currentState.context)
-        return { ...currentState, mod } // HMR /w Redux and HOCs can be finicky, so we
+        return { ...currentState, mod }
       }
       return null
     }
 
-    init(props, context) {
+    componentDidMount() {
       this._initialized = true
+    }
 
+    init(props, context) {
       const { addModule, requireSync, requireAsync, asyncOnly } = req(
         asyncModule,
         options,
