@@ -20,6 +20,7 @@ import {
   createDefaultRender,
   isServer
 } from './utils'
+import { __update } from './helpers'
 
 export { CHUNK_NAMES, MODULE_IDS } from './requireUniversalModule'
 export { default as ReportChunks } from './report-chunks'
@@ -141,50 +142,6 @@ export default function universal<Props: Props>(
         .catch(error => this.update({ error, props, context }))
     }
 
-    __update = (
-      props: Props,
-      state: State,
-      isMount?: boolean = false,
-      isSync?: boolean = false,
-      isServer?: boolean = false
-    ) => {
-      if (!this._initialized) return state
-      if (!state.error) {
-        state.error = null
-      }
-
-      return this.__handleAfter(props, state, isMount, isSync, isServer)
-    }
-
-    /* eslint class-methods-use-this: ["error", { "exceptMethods": ["__handleAfter"] }] */
-    __handleAfter(
-      props: Props,
-      state: State,
-      isMount: boolean,
-      isSync: boolean,
-      isServer: boolean
-    ) {
-      const { mod, error } = state
-
-      if (mod && !error) {
-        hoist(UniversalComponent, mod, {
-          preload: true,
-          preloadWeak: true
-        })
-
-        if (props.onAfter) {
-          const { onAfter } = props
-          const info = { isMount, isSync, isServer }
-          onAfter(info, mod)
-        }
-      }
-      else if (error && props.onError) {
-        props.onError(error)
-      }
-
-      return state
-    }
-
     update = (
       state: State,
       isMount?: boolean = false,
@@ -236,6 +193,52 @@ export default function universal<Props: Props>(
       this.setState(state)
     }
 
+    init(props, context) {
+      const { addModule, requireSync, requireAsync, asyncOnly } = req(
+        asyncModule,
+        options,
+        props
+      )
+
+      let mod
+
+      try {
+        mod = requireSync(props, context)
+      }
+      catch (error) {
+        return __update(props, { error, props, context }, this._initialized)
+      }
+
+      this._asyncOnly = asyncOnly
+      const chunkName = addModule(props) // record the module for SSR flushing :)
+
+      if (context.report) {
+        context.report(chunkName)
+      }
+
+      if (mod || isServer) {
+        this.handleBefore(true, true, isServer)
+        return __update(
+          props,
+          { asyncOnly, props, mod, context },
+          this._initialized,
+          true,
+          true,
+          isServer
+        )
+      }
+
+      this.handleBefore(true, false)
+      this.requireAsyncInner(
+        requireAsync,
+        props,
+        { props, asyncOnly, mod, context },
+        context,
+        true
+      )
+      return { mod, asyncOnly, context, props }
+    }
+
     constructor(props: Props, context: {}) {
       super(props, context)
       this.state = this.init(this.props, this.context)
@@ -260,52 +263,7 @@ export default function universal<Props: Props>(
       this._initialized = true
     }
 
-    init(props, context) {
-      const { addModule, requireSync, requireAsync, asyncOnly } = req(
-        asyncModule,
-        options,
-        props
-      )
-
-      let mod
-
-      try {
-        mod = requireSync(props, context)
-      }
-      catch (error) {
-        return this.__update(props, { error, props, context })
-      }
-
-      this._asyncOnly = asyncOnly
-      const chunkName = addModule(props) // record the module for SSR flushing :)
-
-      if (context.report) {
-        context.report(chunkName)
-      }
-
-      if (mod || isServer) {
-        this.handleBefore(true, true, isServer)
-        return this.__update(
-          props,
-          { asyncOnly, props, mod, context },
-          true,
-          true,
-          isServer
-        )
-      }
-
-      this.handleBefore(true, false)
-      this.requireAsyncInner(
-        requireAsync,
-        props,
-        { props, asyncOnly, mod, context },
-        context,
-        true
-      )
-      return { mod, asyncOnly, context, props }
-    }
-
-    componentDidUpdate(prevProps, prevState, snapshot) {
+    componentDidUpdate(prevProps) {
       if (isDynamic || this._asyncOnly) {
         const { requireSync, requireAsync, shouldUpdate } = req(
           asyncModule,
