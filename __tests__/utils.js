@@ -1,11 +1,8 @@
 import { createPath } from '../__test-helpers__'
 
-import {
-  tryRequire,
-  requireById,
-  resolveExport,
-  findExport
-} from '../src/utils'
+import { tryRequire, resolveExport, findExport } from '../src/utils'
+
+import requireById from '../src/requireById'
 
 test('tryRequire: requires module using key export finder + calls onLoad with module', () => {
   const moduleEs6 = createPath('es6')
