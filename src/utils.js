@@ -1,5 +1,6 @@
 // @flow
 import * as React from 'react'
+import requireById from './requireById'
 
 import type {
   Id,
@@ -46,14 +47,6 @@ export const tryRequire = (id: Id): ?any => {
   }
 
   return null
-}
-
-export const requireById = (id: Id): ?any => {
-  if (!isWebpack() && typeof id === 'string') {
-    return module.require(`${id}`)
-  }
-
-  return __webpack_require__(`${id}`)
 }
 
 export const resolveExport = (
