@@ -50,10 +50,10 @@ export const tryRequire = (id: Id): ?any => {
 
 export const requireById = (id: Id): ?any => {
   if (!isWebpack() && typeof id === 'string') {
-    return module.require(id)
+    return module.require(`${id}`)
   }
 
-  return __webpack_require__(id)
+  return __webpack_require__(`${id}`)
 }
 
 export const resolveExport = (
