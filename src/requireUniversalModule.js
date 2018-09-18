@@ -139,7 +139,11 @@ export default function requireUniversalModule<Props: Props>(
       if (chunkName) {
         let name = callForString(chunkName, props)
         if (usesBabelPlugin) {
-          name = name.replace(/\//g, '-')
+          // if ignoreBabelRename is true, don't apply regex
+          const shouldKeepName = options && !!options.ignoreBabelRename
+          if (!shouldKeepName) {
+            name = name.replace(/\//g, '-')
+          }
         }
         if (name) CHUNK_NAMES.add(name)
         if (!isTest) return name // makes tests way smaller to run both kinds
@@ -201,9 +205,14 @@ const getConfig = (
   props: Props
 ): Config => {
   if (isDynamic) {
-    return typeof universalConfig === 'function'
-      ? universalConfig(props)
-      : universalConfig
+    let resultingConfig =
+      typeof universalConfig === 'function'
+        ? universalConfig(props)
+        : universalConfig
+    if (options) {
+      resultingConfig = { ...resultingConfig, ...options }
+    }
+    return resultingConfig
   }
 
   const load: Load =

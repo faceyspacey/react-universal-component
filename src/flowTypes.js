@@ -38,7 +38,8 @@ export type ModuleOptions = {
   modCache: Object,
   promCache: Object,
   id?: string,
-  usesBabelPlugin?: boolean
+  usesBabelPlugin?: boolean,
+  ignoreBabelRename?: boolean
 }
 
 export type ComponentOptions = {
