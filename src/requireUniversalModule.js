@@ -40,7 +40,8 @@ export default function requireUniversalModule<Props: Props>(
     onError,
     isDynamic,
     modCache,
-    promCache
+    promCache,
+    usesBabelPlugin
   } = options
 
   const config = getConfig(isDynamic, universalConfig, options, props)
@@ -136,7 +137,14 @@ export default function requireUniversalModule<Props: Props>(
   const addModule = (props: Object): ?string => {
     if (isServer || isTest) {
       if (chunkName) {
-        const name = callForString(chunkName, props)
+        let name = callForString(chunkName, props)
+        if (usesBabelPlugin) {
+          // if ignoreBabelRename is true, don't apply regex
+          const shouldKeepName = options && !!options.ignoreBabelRename
+          if (!shouldKeepName) {
+            name = name.replace(/\//g, '-')
+          }
+        }
         if (name) CHUNK_NAMES.add(name)
         if (!isTest) return name // makes tests way smaller to run both kinds
       }
@@ -197,9 +205,14 @@ const getConfig = (
   props: Props
 ): Config => {
   if (isDynamic) {
-    return typeof universalConfig === 'function'
-      ? universalConfig(props)
-      : universalConfig
+    let resultingConfig =
+      typeof universalConfig === 'function'
+        ? universalConfig(props)
+        : universalConfig
+    if (options) {
+      resultingConfig = { ...resultingConfig, ...options }
+    }
+    return resultingConfig
   }
 
   const load: Load =

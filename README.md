@@ -159,6 +159,8 @@ The first argument can be a function that returns a promise, a promise itself, o
 - `minDelay`: `0` -- *default*
 - `alwaysDelay`: `false` -- *default*
 - `loadingTransition`: `true` -- *default*
+- `ignoreBabelRename`: `false` -- *default*
+
 - `render`: `(props, module, isLoading, error) => <CustomComponent />` -- *default*: the default rendering logic is roughly equivalent to the following.
   ```js
   render: (props, Mod, isLoading, error) => {
@@ -199,6 +201,7 @@ The first argument can be a function that returns a promise, a promise itself, o
 - `alwaysDelay` is a boolean you can set to true (*default: false*) to guarantee the `minDelay` is always used (i.e. even when components cached from previous imports and therefore synchronously and instantly required). This can be useful for guaranteeing animations operate as you want without having to wire up other components to perform the task. *Note: this only applies to the client when your `UniversalComponent` uses dynamic expressions to switch between multiple components.*
 
 - `loadingTransition` when set to `false` allows you to keep showing the current component when the `loading` component would otherwise show during transitions from one component to the next.
+- `ignoreBabelRename` is by default set to `false` which allows the plugin to attempt and name the dynamically imported chunk (replacing `/` with `-`).  In more advanced scenarios where more granular control is required over the webpack chunk name, you should set this to `true` in addition to providing a function to `chunkName` to control chunk naming.
 
 - `render` overrides the default rendering logic. This option enables some interesting and useful usage of this library. Please refer to the [Custom Rendering](#custom-rendering) section.
 
