@@ -1,6 +1,6 @@
 {
   "name": "react-universal-component",
-  "version": "4.0.0-alpha.1",
+  "version": "4.0.0-alpha.3",
   "description": "A higher order component for loading components with promises",
   "main": "dist/index.js",
   "typings": "index.d.ts",

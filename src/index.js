@@ -48,10 +48,11 @@ export default function universal<Props: Props>(
     ...options
   } = opts
 
-  const render = userRender || createDefaultRender(Loading, Err)
+  const renderFunc = userRender || createDefaultRender(Loading, Err)
 
   const isDynamic = hasBabelPlugin || testBabelPlugin
   options.isDynamic = isDynamic
+  options.usesBabelPlugin = hasBabelPlugin
   options.modCache = {}
   options.promCache = {}
 
@@ -274,7 +275,7 @@ export default function universal<Props: Props>(
     render() {
       const { isLoading, error: userError, ...props } = this.props
       const { mod, error } = this.state
-      return render(props, mod, isLoading, userError || error)
+      return renderFunc(props, mod, isLoading, userError || error)
     }
   }
 }
