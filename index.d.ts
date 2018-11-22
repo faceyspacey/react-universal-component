@@ -125,6 +125,14 @@ declare module 'react-universal-component' {
        */
       loadingTransition: boolean;
 
+      /**
+       * `ignoreBabelRename` is by default set to false which allows the plugin to attempt
+       * and name the dynamically imported chunk (replacing / with -).
+       * In more advanced scenarios where more granular control is required over the webpack chunk name,
+       * you should set this to true in addition to providing a function to chunkName to control chunk naming.
+       */
+      ignoreBabelRename: boolean;
+
       testBabelPlugin: boolean;
 
       resolve: string | number | ((props: P) => number | string);
