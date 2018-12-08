@@ -65,7 +65,7 @@ declare module 'react-universal-component' {
   type UniversalComponent<P> = React.StatelessComponent<
     P & Partial<UniversalProps>
   > & {
-    preload(): void;
+    preload(props?: P): void;
   };
 
   type Module<P> =
