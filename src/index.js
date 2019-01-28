@@ -4,7 +4,6 @@ import PropTypes from 'prop-types'
 import hoist from 'hoist-non-react-statics'
 import { Context } from 'vm'
 import req from './requireUniversalModule'
-
 import type {
   Config,
   ConfigFunc,
@@ -192,7 +191,7 @@ export default function universal<Props: Props>(
 
       this.setState(state)
     }
-
+    // $FlowFixMe
     init(props, context) {
       const { addModule, requireSync, requireAsync, asyncOnly } = req(
         asyncModule,
@@ -242,6 +241,7 @@ export default function universal<Props: Props>(
     constructor(props: Props, context: {}) {
       super(props, context)
       this.state = this.init(this.props, this.context)
+      // $FlowFixMe
       this.state.error = null
     }
 
@@ -263,7 +263,7 @@ export default function universal<Props: Props>(
       this._initialized = true
     }
 
-    componentDidUpdate(prevProps) {
+    componentDidUpdate(prevProps: Props) {
       if (isDynamic || this._asyncOnly) {
         const { requireSync, requireAsync, shouldUpdate } = req(
           asyncModule,
