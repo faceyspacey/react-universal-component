@@ -2,8 +2,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import hoist from 'hoist-non-react-statics'
+import { Context } from 'vm'
 import req from './requireUniversalModule'
-
 import type {
   Config,
   ConfigFunc,
@@ -19,6 +19,7 @@ import {
   createDefaultRender,
   isServer
 } from './utils'
+import { __update } from './helpers'
 
 export { CHUNK_NAMES, MODULE_IDS } from './requireUniversalModule'
 export { default as ReportChunks } from './report-chunks'
@@ -48,7 +49,7 @@ export default function universal<Props: Props>(
     ...options
   } = opts
 
-  const render = userRender || createDefaultRender(Loading, Err)
+  const renderFunc = userRender || createDefaultRender(Loading, Err)
 
   const isDynamic = hasBabelPlugin || testBabelPlugin
   options.isDynamic = isDynamic
@@ -58,7 +59,7 @@ export default function universal<Props: Props>(
 
   return class UniversalComponent extends React.Component<void, Props, *> {
     /* eslint-disable react/sort-comp */
-    _mounted: boolean
+    _initialized: boolean
     _asyncOnly: boolean
 
     state: State
@@ -112,103 +113,22 @@ export default function universal<Props: Props>(
       report: PropTypes.func
     }
 
-    constructor(props: Props, context: {}) {
-      super(props, context)
-      this.state = { error: null }
-    }
-
-    componentWillMount() {
-      this._mounted = true
-
-      const { addModule, requireSync, requireAsync, asyncOnly } = req(
-        asyncModule,
-        options,
-        this.props
-      )
-
-      let mod
-
-      try {
-        mod = requireSync(this.props, this.context)
-      }
-      catch (error) {
-        return this.update({ error })
-      }
-
-      this._asyncOnly = asyncOnly
-      const chunkName = addModule(this.props) // record the module for SSR flushing :)
-
-      if (this.context.report) {
-        this.context.report(chunkName)
-      }
-
-      if (mod || isServer) {
-        this.handleBefore(true, true, isServer)
-        this.update({ mod }, true, true, isServer)
-        return
-      }
-
-      this.handleBefore(true, false)
-      this.requireAsync(requireAsync, this.props, true)
-    }
-
-    componentWillUnmount() {
-      this._mounted = false
-    }
-
-    componentWillReceiveProps(nextProps: Props) {
-      if (isDynamic || this._asyncOnly) {
-        const { requireSync, requireAsync, shouldUpdate } = req(
-          asyncModule,
-          options,
-          nextProps,
-          this.props
-        )
-
-        if (shouldUpdate(nextProps, this.props)) {
-          let mod
-
-          try {
-            mod = requireSync(nextProps, this.context)
-          }
-          catch (error) {
-            return this.update({ error })
-          }
-
-          this.handleBefore(false, !!mod)
-
-          if (!mod) {
-            return this.requireAsync(requireAsync, nextProps)
-          }
-
-          const state = { mod }
-
-          if (alwaysDelay) {
-            if (loadingTransition) this.update({ mod: null }) // display `loading` during componentWillReceiveProps
-            setTimeout(() => this.update(state, false, true), minDelay)
-            return
-          }
-
-          this.update(state, false, true)
-        }
-        else if (isHMR()) {
-          const mod = requireSync(nextProps, this.context)
-          this.setState({ mod: () => null }) // HMR /w Redux and HOCs can be finicky, so we
-          setTimeout(() => this.setState({ mod })) // toggle components to insure updates occur
-        }
-      }
-    }
-
-    requireAsync(requireAsync: RequireAsync, props: Props, isMount?: boolean) {
-      if (this.state.mod && loadingTransition) {
-        this.update({ mod: null }) // display `loading` during componentWillReceiveProps
+    requireAsyncInner(
+      requireAsync: RequireAsync,
+      props: Props,
+      state: State,
+      context: Context,
+      isMount?: boolean
+    ) {
+      if (!state.mod && loadingTransition) {
+        this.update({ mod: null, props }) // display `loading` during componentWillReceiveProps
       }
 
       const time = new Date()
 
-      requireAsync(props, this.context)
+      requireAsync(props, context)
         .then((mod: ?any) => {
-          const state = { mod }
+          const state = { mod, props, context }
 
           const timeLapsed = new Date() - time
           if (timeLapsed < minDelay) {
@@ -218,7 +138,7 @@ export default function universal<Props: Props>(
 
           this.update(state, isMount)
         })
-        .catch(error => this.update({ error }))
+        .catch(error => this.update({ error, props, context }))
     }
 
     update = (
@@ -227,7 +147,7 @@ export default function universal<Props: Props>(
       isSync?: boolean = false,
       isServer?: boolean = false
     ) => {
-      if (!this._mounted) return
+      if (!this._initialized) return
       if (!state.error) state.error = null
 
       this.handleAfter(state, isMount, isSync, isServer)
@@ -271,11 +191,124 @@ export default function universal<Props: Props>(
 
       this.setState(state)
     }
+    // $FlowFixMe
+    init(props, context) {
+      const { addModule, requireSync, requireAsync, asyncOnly } = req(
+        asyncModule,
+        options,
+        props
+      )
+
+      let mod
+
+      try {
+        mod = requireSync(props, context)
+      }
+      catch (error) {
+        return __update(props, { error, props, context }, this._initialized)
+      }
+
+      this._asyncOnly = asyncOnly
+      const chunkName = addModule(props) // record the module for SSR flushing :)
+
+      if (context.report) {
+        context.report(chunkName)
+      }
+
+      if (mod || isServer) {
+        this.handleBefore(true, true, isServer)
+        return __update(
+          props,
+          { asyncOnly, props, mod, context },
+          this._initialized,
+          true,
+          true,
+          isServer
+        )
+      }
+
+      this.handleBefore(true, false)
+      this.requireAsyncInner(
+        requireAsync,
+        props,
+        { props, asyncOnly, mod, context },
+        context,
+        true
+      )
+      return { mod, asyncOnly, context, props }
+    }
+
+    constructor(props: Props, context: {}) {
+      super(props, context)
+      this.state = this.init(this.props, this.context)
+      // $FlowFixMe
+      this.state.error = null
+    }
+
+    static getDerivedStateFromProps(nextProps, currentState) {
+      const { requireSync, shouldUpdate } = req(
+        asyncModule,
+        options,
+        nextProps,
+        currentState.props
+      )
+      if (isHMR() && shouldUpdate(currentState.props, nextProps)) {
+        const mod = requireSync(nextProps, currentState.context)
+        return { ...currentState, mod }
+      }
+      return null
+    }
+
+    componentDidMount() {
+      this._initialized = true
+    }
+
+    componentDidUpdate(prevProps: Props) {
+      if (isDynamic || this._asyncOnly) {
+        const { requireSync, requireAsync, shouldUpdate } = req(
+          asyncModule,
+          options,
+          this.props,
+          prevProps
+        )
+
+        if (shouldUpdate(this.props, prevProps)) {
+          let mod
+
+          try {
+            mod = requireSync(this.props, this.context)
+          }
+          catch (error) {
+            return this.update({ error })
+          }
+
+          this.handleBefore(false, !!mod)
+
+          if (!mod) {
+            return this.requireAsyncInner(requireAsync, this.props, { mod })
+          }
+
+          const state = { mod }
+
+          if (alwaysDelay) {
+            if (loadingTransition) this.update({ mod: null }) // display `loading` during componentWillReceiveProps
+            setTimeout(() => this.update(state, false, true), minDelay)
+            return
+          }
+
+          this.update(state, false, true)
+        }
+      }
+    }
+
+    componentWillUnmount() {
+      this._initialized = false
+    }
 
     render() {
       const { isLoading, error: userError, ...props } = this.props
       const { mod, error } = this.state
-      return render(props, mod, isLoading, userError || error)
+      return renderFunc(props, mod, isLoading, userError || error)
     }
   }
 }

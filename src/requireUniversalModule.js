@@ -227,6 +227,7 @@ const getConfig = (
     chunkName: options.chunkName || 'default',
     resolve: options.resolve || '',
     path: options.path || '',
-    load
+    load,
+    ignoreBabelRename: true
   }
 }
