@@ -189,6 +189,13 @@ declare module 'react-universal-component' {
       error:
         | ((p: P) => JSX.Element | ComponentType<P & { error: Error }>)
         | (JSX.Element | ComponentType<P & { error: Error }>);
+    
+      render: (
+        props: P,
+        module: Export | undefined,
+        isLoading: boolean,
+        error: Error | undefined
+      ) => JSX.Element
     }
   >;
 
