@@ -41,7 +41,8 @@ export default function requireUniversalModule<Props: Props>(
     isDynamic,
     modCache,
     promCache,
-    usesBabelPlugin
+    usesBabelPlugin,
+    debug
   } = options
 
   const config = getConfig(isDynamic, universalConfig, options, props)
@@ -49,7 +50,18 @@ export default function requireUniversalModule<Props: Props>(
   const asyncOnly = (!path && !resolve) || typeof chunkName === 'function'
 
   const requireSync = (props: Object, context: Object): ?any => {
+    const debugVars = {
+      universalConfig,
+      options,
+      config,
+      props,
+      prevProps
+    }
     let exp = loadFromCache(chunkName, props, modCache)
+
+    if (!exp && debug) {
+      console.warn('[requireSync] Module is not in cache', debugVars)
+    }
 
     if (!exp) {
       let mod
@@ -57,12 +69,28 @@ export default function requireUniversalModule<Props: Props>(
       if (!isWebpack() && path) {
         const modulePath = callForString(path, props) || ''
         mod = tryRequire(modulePath)
+
+        if (!mod && debug) {
+          console.warn(
+            '[requireSync] tryRequire with modulePath failed',
+            { modulePath },
+            debugVars
+          )
+        }
       }
       else if (isWebpack() && resolve) {
         const weakId = callForString(resolve, props)
 
         if (__webpack_modules__[weakId]) {
           mod = tryRequire(weakId)
+        }
+
+        if (!mod && debug) {
+          console.warn(
+            '[requireSync] tryRequire with weakId failed',
+            { weakId },
+            debugVars
+          )
         }
       }
 
@@ -77,6 +105,10 @@ export default function requireUniversalModule<Props: Props>(
           modCache,
           true
         )
+
+        if (!exp && debug) {
+          console.warn('[requireSync] resolveExport failed', debugVars)
+        }
       }
     }
 
@@ -84,6 +116,12 @@ export default function requireUniversalModule<Props: Props>(
   }
 
   const requireAsync = (props: Object, context: Object): Promise<?any> => {
+    const debugVars = {
+      props,
+      context,
+      options,
+      config
+    }
     const exp = loadFromCache(chunkName, props, modCache)
     if (exp) return Promise.resolve(exp)
 
@@ -92,6 +130,10 @@ export default function requireUniversalModule<Props: Props>(
 
     const prom = new Promise((res, rej) => {
       const reject = error => {
+        if (debug) {
+          console.warn('[requireAsync] Failed to load module', error, debugVars)
+        }
+
         error = error || new Error('timeout exceeded')
         clearTimeout(timer)
         if (onError) {

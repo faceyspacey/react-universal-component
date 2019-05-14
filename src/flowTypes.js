@@ -38,7 +38,8 @@ export type ModuleOptions = {
   modCache: Object,
   promCache: Object,
   id?: string,
-  usesBabelPlugin?: boolean
+  usesBabelPlugin?: boolean,
+  debug?: boolean
 }
 
 export type ComponentOptions = {
@@ -58,7 +59,8 @@ export type ComponentOptions = {
   onLoad?: OnLoad,
   onError?: OnError,
   alwaysUpdate?: boolean,
-  id?: string
+  id?: string,
+  debug?: boolean
 }
 
 // RUM

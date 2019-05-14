@@ -397,3 +397,47 @@ describe('other options', () => {
     delete global.__webpack_modules__
   })
 })
+
+describe('debug warnings', () => {
+  it('requireAsync fails to load module', async () => {
+    const consoleWarnSpy = jest.spyOn(console, 'warn')
+    const error = new Error('Not here, mate')
+    const { requireAsync } = requireModule(Promise.reject(error), {
+      debug: true
+    })
+
+    try {
+      await requireAsync()
+    }
+    catch (error) {
+      const args = consoleWarnSpy.mock.calls[0]
+
+      expect(args[0]).toBe('[requireAsync] Failed to load module')
+      expect(args[1]).toBe(error)
+      expect(typeof args[2]).toBe('object') // debug vars
+    }
+
+    consoleWarnSpy.mockRestore()
+  })
+
+  it('requireAsync fails to resolve export', async () => {
+    const consoleWarnSpy = jest.spyOn(console, 'warn')
+    const { requireAsync } = requireModule(Promise.resolve({ myModule: 1 }), {
+      key: 'inexisting_export_key',
+      debug: true
+    })
+
+    try {
+      await requireAsync()
+    }
+    catch (error) {
+      const args = consoleWarnSpy.mock.calls[0]
+
+      expect(args[0]).toBe('[requireAsync] Failed to load module')
+      expect(args[1].message).toBe('export not found')
+      expect(typeof args[2]).toBe('object') // debug vars
+    }
+
+    consoleWarnSpy.mockRestore()
+  })
+})

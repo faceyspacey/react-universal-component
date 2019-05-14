@@ -15,8 +15,9 @@ export const babelInterop = (mod: ?Mod) =>
   mod && typeof mod === 'object' && mod.__esModule ? mod.default : mod
 
 export const DefaultLoading = () => <div>Loading...</div>
-export const DefaultError = ({ error }: { error: Object }) =>
+export const DefaultError = ({ error }: { error: Object }) => (
   <div>Error: {error && error.message}</div>
+)
 
 export const tryRequire = (id: Id): ?any => {
   try {
@@ -27,7 +28,9 @@ export const tryRequire = (id: Id): ?any => {
     // this can sometimes lead the server to render the loading component.
     if (process.env.NODE_ENV === 'development') {
       console.warn(
-        `chunk not available for synchronous require yet: ${id}: ${err.message}`,
+        `chunk not available for synchronous require yet: ${id}: ${
+          err.message
+        }`,
         err.stack
       )
     }
@@ -76,9 +79,11 @@ export const findExport = (mod: ?Mod, key?: Key): ?any => {
 }
 
 export const createElement = (Component: any, props: {}) =>
-  React.isValidElement(Component)
-    ? React.cloneElement(Component, props)
-    : <Component {...props} />
+  React.isValidElement(Component) ? (
+    React.cloneElement(Component, props)
+  ) : (
+    <Component {...props} />
+  )
 
 export const callForString = (strFun: StrFun, props: Object) =>
   typeof strFun === 'function' ? strFun(props) : strFun
