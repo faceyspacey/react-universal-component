@@ -2,7 +2,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import hoist from 'hoist-non-react-statics'
-import { Context } from 'vm'
 import req from './requireUniversalModule'
 import type {
   Config,
@@ -117,7 +116,7 @@ export default function universal<Props: Props>(
       requireAsync: RequireAsync,
       props: Props,
       state: State,
-      context: Context,
+      context: Object = {},
       isMount?: boolean
     ) {
       if (!state.mod && loadingTransition) {
