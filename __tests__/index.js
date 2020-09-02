@@ -280,8 +280,7 @@ describe('other options', () => {
     await waitFor(50)
     const info = { isServer: false, isSync: false }
     const props = { foo: 'bar' }
-    const context = {}
-    expect(onLoad).toBeCalledWith(mod, info, props, context)
+    expect(onLoad).toBeCalledWith(mod, info, props)
 
     expect(component.toJSON()).toMatchSnapshot() // success
   })
@@ -299,8 +298,7 @@ describe('other options', () => {
 
     await waitFor(50)
     const info = { isServer: false, isSync: false }
-    const context = {}
-    expect(onLoad).toBeCalledWith(mod, info, {}, context)
+    expect(onLoad).toBeCalledWith(mod, info, {})
 
     expect(component.toJSON()).toMatchSnapshot() // success
   })
@@ -322,7 +320,6 @@ describe('other options', () => {
         isServer: false,
         isSync: true
       },
-      {},
       {}
     )
   })

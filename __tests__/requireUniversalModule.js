@@ -361,11 +361,10 @@ describe('other options', () => {
     })
 
     const props = { foo: 'bar' }
-    const context = {}
-    await requireAsync(props, context)
+    await requireAsync(props)
 
     const info = { isServer: false, isSync: false }
-    expect(onLoad).toBeCalledWith(mod, info, props, context)
+    expect(onLoad).toBeCalledWith(mod, info, props)
     expect(onLoad).not.toBeCalledWith('foo', info, props)
   })
 
@@ -386,11 +385,10 @@ describe('other options', () => {
     })
 
     const props = { foo: 'bar' }
-    const context = {}
-    requireSync(props, context)
+    requireSync(props)
 
     const info = { isServer: false, isSync: true }
-    expect(onLoad).toBeCalledWith(mod, info, props, context)
+    expect(onLoad).toBeCalledWith(mod, info, props)
     expect(onLoad).not.toBeCalledWith('foo', info, props)
 
     delete global.__webpack_require__

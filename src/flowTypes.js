@@ -73,13 +73,12 @@ export type Key = string | null | ((module: ?(Object | Function)) => any)
 export type OnLoad = (
   module: ?(Object | Function),
   info: { isServer: boolean },
-  props: Object,
-  context: Object
+  props: Object
 ) => void
 export type OnError = (error: Object, info: { isServer: boolean }) => void
 
-export type RequireAsync = (props: Object, context: Object) => Promise<?any>
-export type RequireSync = (props: Object, context: Object) => ?any
+export type RequireAsync = (props: Object) => Promise<?any>
+export type RequireSync = (props: Object) => ?any
 export type AddModule = (props: Object) => ?string
 export type Mod = Object | Function
 export type Tools = {
@@ -106,6 +105,10 @@ export type Props = {
   onBefore?: OnBefore,
   onAfter?: OnAfter,
   onError?: OnErrorProp
+}
+
+export type Context = {
+  report?: (chunkName: string) => void
 }
 
 export type GenericComponent<Props> = Props =>

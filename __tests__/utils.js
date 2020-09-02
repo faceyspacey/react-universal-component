@@ -57,13 +57,12 @@ test('resolveExport: finds export and calls onLoad', () => {
   const onLoad = jest.fn()
   const mod = { foo: 'bar' }
   const props = { baz: 123 }
-  const context = {}
 
-  const exp = resolveExport(mod, 'foo', onLoad, undefined, props, context)
+  const exp = resolveExport(mod, 'foo', onLoad, undefined, props)
   expect(exp).toEqual('bar')
 
   const info = { isServer: false, isSync: false }
-  expect(onLoad).toBeCalledWith(mod, info, props, context)
+  expect(onLoad).toBeCalledWith(mod, info, props)
   // todo: test caching
 })
 
