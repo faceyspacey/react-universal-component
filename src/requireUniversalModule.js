@@ -48,7 +48,7 @@ export default function requireUniversalModule<Props: Props>(
   const { chunkName, path, resolve, load } = config
   const asyncOnly = (!path && !resolve) || typeof chunkName === 'function'
 
-  const requireSync = (props: Object, context: Object): ?any => {
+  const requireSync = (props: Object): ?any => {
     let exp = loadFromCache(chunkName, props, modCache)
 
     if (!exp) {
@@ -67,23 +67,14 @@ export default function requireUniversalModule<Props: Props>(
       }
 
       if (mod) {
-        exp = resolveExport(
-          mod,
-          key,
-          onLoad,
-          chunkName,
-          props,
-          context,
-          modCache,
-          true
-        )
+        exp = resolveExport(mod, key, onLoad, chunkName, props, modCache, true)
       }
     }
 
     return exp
   }
 
-  const requireAsync = (props: Object, context: Object): Promise<?any> => {
+  const requireAsync = (props: Object): Promise<?any> => {
     const exp = loadFromCache(chunkName, props, modCache)
     if (exp) return Promise.resolve(exp)
 
@@ -108,15 +99,7 @@ export default function requireUniversalModule<Props: Props>(
       const resolve = mod => {
         clearTimeout(timer)
 
-        const exp = resolveExport(
-          mod,
-          key,
-          onLoad,
-          chunkName,
-          props,
-          context,
-          modCache
-        )
+        const exp = resolveExport(mod, key, onLoad, chunkName, props, modCache)
         if (exp) return res(exp)
 
         reject(new Error('export not found'))

@@ -55,7 +55,6 @@ export const resolveExport = (
   onLoad: ?OnLoad,
   chunkName: ?StrFun,
   props: Object,
-  context: Object,
   modCache: Object,
   isSync?: boolean = false
 ) => {
@@ -63,7 +62,7 @@ export const resolveExport = (
   if (onLoad && mod) {
     const isServer = typeof window === 'undefined'
     const info = { isServer, isSync }
-    onLoad(mod, info, props, context)
+    onLoad(mod, info, props)
   }
   if (chunkName && exp) cacheExport(exp, chunkName, props, modCache)
   return exp

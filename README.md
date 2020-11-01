@@ -155,7 +155,7 @@ The first argument can be a function that returns a promise, a promise itself, o
 - `key`: `'foo'` || `module => module.foo` -- *default: `default` export in ES6 and `module.exports` in ES5*
 - `timeout`: `15000` -- *default*
 - `onError`: `(error, { isServer }) => handleError(error, isServer)
-- `onLoad`: `(module, { isSync, isServer }, props, context) => do(module, isSync, isServer, props, context)`
+- `onLoad`: `(module, { isSync, isServer }, props) => do(module, isSync, isServer, props)`
 - `minDelay`: `0` -- *default*
 - `alwaysDelay`: `false` -- *default*
 - `loadingTransition`: `true` -- *default*
@@ -187,11 +187,11 @@ The first argument can be a function that returns a promise, a promise itself, o
 
 - `onLoad` is a callback function that receives the *entire* module. It allows you to export and put to use things other than your `default` component export, like reducers, sagas, etc. E.g:
   ```js
-  onLoad: (module, info, props, context) => {
-    context.store.replaceReducer({ ...otherReducers, foo: module.fooReducer })
+  onLoad: (module, info, props) => {
+    props.store.replaceReducer({ ...otherReducers, foo: module.fooReducer })
 
     // if a route triggered component change, new reducers needs to reflect it
-    context.store.dispatch({ type: 'INIT_ACTION_FOR_ROUTE', payload: { param: props.param } })
+    props.store.dispatch({ type: 'INIT_ACTION_FOR_ROUTE', payload: { param: props.param } })
   }
   ````
   **As you can see we have thought of everything you might need to really do code-splitting right (we have real apps that use this stuff).** `onLoad` is fired directly before the component is rendered so you can setup any reducers/etc it depends on. Unlike the `onAfter` prop, this *option* to the `universal` *HOC* is only fired the first time the module is received. *Also note*: it will fire on the server, so do `if (!isServer)` if you have to. But also keep in mind you will need to do things like replace reducers on both the server + client for the imported component that uses new reducers to render identically in both places.

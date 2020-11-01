@@ -9,8 +9,10 @@ import type {
   ComponentOptions,
   RequireAsync,
   State,
-  Props
+  Props,
+  Context
 } from './flowTypes'
+import ReportContext from './context'
 
 import {
   DefaultLoading,
@@ -63,16 +65,17 @@ export default function universal<Props: Props>(
 
     state: State
     props: Props
-    context: Object
     /* eslint-enable react/sort-comp */
 
-    static preload(props: Props, context: Object = {}) {
+    static contextType = ReportContext
+
+    static preload(props: Props) {
       props = props || {}
       const { requireAsync, requireSync } = req(asyncModule, options, props)
       let mod
 
       try {
-        mod = requireSync(props, context)
+        mod = requireSync(props)
       }
       catch (error) {
         return Promise.reject(error)
@@ -81,7 +84,7 @@ export default function universal<Props: Props>(
       return Promise.resolve()
         .then(() => {
           if (mod) return mod
-          return requireAsync(props, context)
+          return requireAsync(props)
         })
         .then(mod => {
           hoist(UniversalComponent, mod, {
@@ -92,11 +95,11 @@ export default function universal<Props: Props>(
         })
     }
 
-    static preloadWeak(props: Props, context: Object = {}) {
+    static preloadWeak(props: Props) {
       props = props || {}
       const { requireSync } = req(asyncModule, options, props)
 
-      const mod = requireSync(props, context)
+      const mod = requireSync(props)
       if (mod) {
         hoist(UniversalComponent, mod, {
           preload: true,
@@ -107,16 +110,10 @@ export default function universal<Props: Props>(
       return mod
     }
 
-    static contextTypes = {
-      store: PropTypes.object,
-      report: PropTypes.func
-    }
-
     requireAsyncInner(
       requireAsync: RequireAsync,
       props: Props,
       state: State,
-      context: Object = {},
       isMount?: boolean
     ) {
       if (!state.mod && loadingTransition) {
@@ -125,9 +122,9 @@ export default function universal<Props: Props>(
 
       const time = new Date()
 
-      requireAsync(props, context)
+      requireAsync(props)
         .then((mod: ?any) => {
-          const state = { mod, props, context }
+          const state = { mod, props }
 
           const timeLapsed = new Date() - time
           if (timeLapsed < minDelay) {
@@ -137,7 +134,7 @@ export default function universal<Props: Props>(
 
           this.update(state, isMount)
         })
-        .catch(error => this.update({ error, props, context }))
+        .catch(error => this.update({ error, props }))
     }
 
     update = (
@@ -191,7 +188,7 @@ export default function universal<Props: Props>(
       this.setState(state)
     }
     // $FlowFixMe
-    init(props, context) {
+    init(props) {
       const { addModule, requireSync, requireAsync, asyncOnly } = req(
         asyncModule,
         options,
@@ -201,24 +198,23 @@ export default function universal<Props: Props>(
       let mod
 
       try {
-        mod = requireSync(props, context)
+        mod = requireSync(props)
       }
       catch (error) {
-        return __update(props, { error, props, context }, this._initialized)
+        return __update(props, { error, props }, this._initialized)
       }
 
       this._asyncOnly = asyncOnly
       const chunkName = addModule(props) // record the module for SSR flushing :)
-
-      if (context.report) {
-        context.report(chunkName)
+      if (this.context && this.context.report) {
+        this.context.report(chunkName)
       }
 
       if (mod || isServer) {
         this.handleBefore(true, true, isServer)
         return __update(
           props,
-          { asyncOnly, props, mod, context },
+          { asyncOnly, props, mod },
           this._initialized,
           true,
           true,
@@ -230,16 +226,15 @@ export default function universal<Props: Props>(
       this.requireAsyncInner(
         requireAsync,
         props,
-        { props, asyncOnly, mod, context },
-        context,
+        { props, asyncOnly, mod },
         true
       )
-      return { mod, asyncOnly, context, props }
+      return { mod, asyncOnly, props }
     }
 
-    constructor(props: Props, context: {}) {
+    constructor(props: Props, context: Context) {
       super(props, context)
-      this.state = this.init(this.props, this.context)
+      this.state = this.init(this.props)
       // $FlowFixMe
       this.state.error = null
     }
@@ -252,7 +247,7 @@ export default function universal<Props: Props>(
         currentState.props
       )
       if (isHMR() && shouldUpdate(currentState.props, nextProps)) {
-        const mod = requireSync(nextProps, currentState.context)
+        const mod = requireSync(nextProps)
         return { ...currentState, mod }
       }
       return null
@@ -275,7 +270,7 @@ export default function universal<Props: Props>(
           let mod
 
           try {
-            mod = requireSync(this.props, this.context)
+            mod = requireSync(this.props)
           }
           catch (error) {
             return this.update({ error })

@@ -2,6 +2,7 @@
 
 import React from 'react'
 import PropTypes from 'prop-types'
+import ReportContext from './context'
 
 type Props = {
   report: Function,
@@ -13,17 +14,18 @@ export default class ReportChunks extends React.Component<void, Props, *> {
     report: PropTypes.func.isRequired
   }
 
-  static childContextTypes = {
-    report: PropTypes.func.isRequired
-  }
-
-  getChildContext() {
-    return {
-      report: this.props.report
+  constructor(props: Props) {
+    super(props)
+    this.state = {
+      report: props.report
     }
   }
 
   render() {
-    return React.Children.only(this.props.children)
+    return (
+      <ReportContext.Provider value={this.state}>
+        {this.props.children}
+      </ReportContext.Provider>
+    )
   }
 }
