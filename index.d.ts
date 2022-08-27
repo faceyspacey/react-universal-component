@@ -3,13 +3,14 @@ declare module 'react-universal-component' {
 
   type ReportChunksProps = {
     report(chunkName: string | undefined): void;
+    children?: React.ReactNode;
   };
 
   export class ReportChunks extends React.Component<ReportChunksProps> {}
 
   type ComponentType<P> =
     | React.ComponentType<P>
-    | React.StatelessComponent<P>
+    | React.FunctionComponent<P>
     | React.ComponentClass<P>
     | React.Component<P>;
 
@@ -62,7 +63,7 @@ declare module 'react-universal-component' {
     ): void;
   };
 
-  type UniversalComponent<P> = React.StatelessComponent<
+  type UniversalComponent<P> = React.FunctionComponent<
     P & Partial<UniversalProps>
   > & {
     preload(props?: P): void;
